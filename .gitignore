@@ -1,0 +1,6 @@
+lib/python-venv*
+*.egg-info
+__pycache__
+logs/
+output/
+build/

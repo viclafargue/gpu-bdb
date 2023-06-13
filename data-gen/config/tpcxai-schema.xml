@@ -1,0 +1,3389 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  <!DOCTYPE schema SYSTEM "structure/pdgfSchema.dtd">-->
+
+<schema name="predictiveanalytics"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="structure/pdgfSchema.xsd">
+
+  <!-- All data is derived from this starting seed. 
+       If this seed is the same, the generated data will the same on each computer/node/platform.
+       Change this seed to generate a different data set.-->
+  <property name="MY_SEED" type="long">4234567890</property>
+  <property name="TTVF" type="double">1.0</property>
+  <property name="includeLabels" type="double">1.0</property>
+  <seed>${MY_SEED}</seed>
+
+ <loadPlugin name="pdgf.generator.FaceImagePlugin" />
+ <loadPlugin name="pdgf.generator.SpeechPlugin" />
+
+  <rng name="PdgfDefaultRandom"/>
+
+  <!--Default Scale factor for all tables -->
+  <property name="SF" type="double">1</property>
+  <property name="SF_TRAINING" type="double">${SF}</property>
+  <property name="SF_sqrt" type="double">Math.sqrt(${SF})</property>
+  <property name="SF_log" type="double">Math.log(${SF})</property>
+  <property name="SF_log_10" type="double">Math.log10(${SF})</property>
+  <property name="SF_log_10_TRAINING" type="double">Math.log10(${SF_TRAINING})</property>
+  <property name="SF_max" type="double">Math.pow(10.0, 8.0)</property>
+  <property name="TTVF_sqrt" type="double">Math.sqrt(${TTVF})</property>
+  <property name="SF_log_1.5" type="double">Math.log(${SF}) / Math.log(1.5d) + 1.0d</property>
+  <property name="SF_log_5" type="double">(Math.log(${SF}) / Math.log(5.0d) + 1.0d)</property>
+  <property name="SF_linear" type="double">${SF} * (2.0d - (${SF_log_5} * ${SF_sqrt} / ${SF}))</property>
+
+  <property name="CUSTOMER_SIZE" type="double">100000 * ${SF_sqrt} * ${TTVF}</property>
+  <property name="ORDER_SIZE_AVG" type="double">7</property>
+  <property name="NUMBER_ORDERS_PER_CUSTOMER_AVG" type="double">${SF_sqrt} / 50 + 1</property>
+
+  <property name="MAX_INVOICES" type="double">100</property>
+  <property name="MAX_STOCKCODESPERINVOICE" type="double">30</property>
+  
+  <property name="ERROR_LOG" type="double">80000</property>
+  <property name="ERROR_LOG_FAILURE_PROB" type="double">0.0021</property>
+  
+  <!-- CALCULATE NUMBER OF WEEKS -->
+  <property name="NUMBER_WEEKS_MIN" type="long">104</property>
+  <property name="NUMBER_WEEKS_MAX" type="long">520</property>
+  <property name="NUMBER_WEEKS" type="long">Math.max(104.0, (Math.floor(${SF_log_10}) + 2) * 52)</property>
+  <property name="NUMBER_WEEKS_TRAINING" type="long">Math.max(104.0, (Math.floor(${SF_log_10_TRAINING}) + 2) * 52)</property>
+
+  <!-- for serving and scoring generate dates after the last training data -->
+  <property name="START_YEAR_OFFSET" type="long">(${includeLabels} == 1.0) ? 0.0 : ${NUMBER_WEEKS_TRAINING} / 52</property>
+  <property name="START_YEAR" type="long">2010 + ${START_YEAR_OFFSET}</property>
+  <property name="START_DATE" type="datetime">java.time.LocalDate.of((int) ${START_YEAR}, 1, 1).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()</property>
+  <property name="END_YEAR" type="long">${START_YEAR} + Math.max(0.0, Math.floor(${NUMBER_WEEKS} / 52 - 1))</property>
+  <property name="END_DATE" type="datetime">java.time.LocalDate.of((int) ${END_YEAR}, 12, 31).atStartOfDay().toInstant(java.time.ZoneOffset.UTC).toEpochMilli()</property>
+  <!-- CALCULATE NUMBER OF STORES -->
+  <property name="NUMBER_STORES_MIN" type="long">1</property>
+  <property name="NUMBER_STORES_MAX" type="long">7000</property>
+  <property name="NUMBER_STORES" type="long">${SF_sqrt} + 10</property>
+
+  <!-- CALCULATE NUMBER OF DEPARTMENTS -->
+  <property name="NUMBER_DEPARTMENTS_MIN" type="long">10</property>
+  <property name="NUMBER_DEPARTMENTS_MAX" type="long">100</property>
+  <property name="NUMBER_DEPARTMENTS" type="long">(${SF_log} + 1) * 11</property>
+
+  <property name="SALES_SIZE" type="double">Math.max(1000.0, ${NUMBER_STORES} * ${NUMBER_DEPARTMENTS} * ${TTVF})</property>
+  <property name="PEAK_PROBABILITY" type="double">0.1</property>
+
+  <property name="ORDER_SIZE" type="double">${CUSTOMER_SIZE} * 0.5 * Math.max(0.0, ${NUMBER_WEEKS})</property>
+  <property name="AVG_ORDER_SIZE" type="double">5.75</property>
+  <property name="AVG_PRODUCT_PRICE" type="double">5</property>
+  <property name="AVG_PRODUCT_QUANTITY" type="double">2</property>
+
+  <property name="NUM_TRIP_TYPE" type="long">38</property>
+
+  <property name="FAILURE_SF">${TTVF} * 10</property>
+  <property name="FAILURE_PROB" type="double"><![CDATA[(${includeLabels} >= 2.0) ? 0.8 : 0.1]]></property>
+  <property name="NUMBER_DISKS_MIN"><![CDATA[(${TTVF} < 1.0) ? 100 : 1000]]></property>
+  <property name="NUMBER_DISKS_MAX"><![CDATA[(${TTVF} < 1.0) ? 100000 : 1000000]]></property>
+  <property name="NUMBER_DISKS">Math.floor(${SF_sqrt} * 1000 * ${TTVF_sqrt})</property>
+  <property name="NUMBER_FAILURE_SAMPLES_MIN"><![CDATA[(${TTVF} < 1.0) ? 10 : 100]]></property>
+  <property name="NUMBER_FAILURE_SAMPLES_MAX"><![CDATA[(${TTVF} < 1.0) ? 400 : 4000]]></property>
+  <property name="NUMBER_FAILURE_SAMPLES">Math.floor(${SF_sqrt} * 100 * ${TTVF_sqrt})</property>
+
+  <!-- Probability that a review is spam -->
+  <property name="${isSpam}" type="double">0.3</property>
+
+  <property name="PRODUCT_SIZE" type="long">1000 * ${SF_sqrt}</property>
+  <!--Constants for table ProductRating and Review-->
+  <property name="${NUMBEROFPRODUCTS}" type="long">10000 * ${SF_sqrt}</property>
+  <property name="${NUMBEROFUSERS}" type="long">${CUSTOMER_SIZE}*0.1</property>
+  <!---border values of the products for the nine user categories 0-8-->
+  <property name="${MINVALUECAT0}" type="long">1</property>
+  <property name="${MAXVALUECAT0}" type="long">${NUMBEROFPRODUCTS}/20</property>
+  <property name="${MINVALUECAT1}" type="long">${NUMBEROFPRODUCTS}/20+1</property>
+  <property name="${MAXVALUECAT1}" type="long">${NUMBEROFPRODUCTS}/20*4</property>
+  <property name="${MINVALUECAT2}" type="long">${NUMBEROFPRODUCTS}/20*4+1</property>
+  <property name="${MAXVALUECAT2}" type="long">${NUMBEROFPRODUCTS}/20*6</property>
+  <property name="${MINVALUECAT3}" type="long">${NUMBEROFPRODUCTS}/20*6+1</property>
+  <property name="${MAXVALUECAT3}" type="long">${NUMBEROFPRODUCTS}/20*7</property>
+  <property name="${MINVALUECAT4}" type="long">${NUMBEROFPRODUCTS}/20*7+1</property>
+  <property name="${MAXVALUECAT4}" type="long">${NUMBEROFPRODUCTS}/20*10</property>
+  <property name="${MINVALUECAT5}" type="long">${NUMBEROFPRODUCTS}/20*10+1</property>
+  <property name="${MAXVALUECAT5}" type="long">${NUMBEROFPRODUCTS}/20*12</property>
+  <property name="${MINVALUECAT6}" type="long">${NUMBEROFPRODUCTS}/20*12+1</property>
+  <property name="${MAXVALUECAT6}" type="long">${NUMBEROFPRODUCTS}/20*14</property>
+  <property name="${MINVALUECAT7}" type="long">${NUMBEROFPRODUCTS}/20*16+1</property>
+  <property name="${MAXVALUECAT7}" type="long">${NUMBEROFPRODUCTS}/20*17</property>
+  <property name="${MINVALUECAT8}" type="long">${NUMBEROFPRODUCTS}/20*17+1</property>
+  <property name="${MAXVALUECAT8}" type="long">${NUMBEROFPRODUCTS}</property>
+
+  <property name="${RATINGSPERCUSTOMER}" type="long">${SF_log}+20</property>
+  <property name="${NUMBEROFMAINPRODUCTS}" type="long">${RATINGSPERCUSTOMER}*4</property>
+
+  <!-- Constants for Use-Case 90 (Face Recognition) -->
+  <property name="CUSTOMER_IMAGE_FRACTION" type="double">0.0001</property>
+  <property name="NUMBER_OF_IMAGES_PER_ID" type="long">10 * ${SF_sqrt}</property>
+  <property name="CUSTOMER_WITH_IMAGES_SIZE" type="double">Math.max(10.0, ${CUSTOMER_SIZE} * ${CUSTOMER_IMAGE_FRACTION})</property>
+  
+  <!-- Constant for tables financial_account and financial_transaction -->
+  <property name="FINANCIAL_CUSTOMER_FRACTION" type="double">0.1</property>
+  <property name="FINANCIAL_CUSTOMER_SIZE" type="long">${CUSTOMER_SIZE} * ${FINANCIAL_CUSTOMER_FRACTION}</property>
+  <property name="FINANCIAL_TRANSACTION_PER_WEEK" type="long">10</property>
+  <property name="FINANCIAL_TRANSACTION_SIZE" type="long">${FINANCIAL_CUSTOMER_SIZE} * ${NUMBER_WEEKS} * ${FINANCIAL_TRANSACTION_PER_WEEK}</property>
+  <property name="${ISFRAUDED}" type="double"><![CDATA[(${includeLabels} >= 2.0) ? 1.0 : 0.1]]></property>
+
+  <property name="${one_day_in_milliseconds}" type="double">24.0 * 60.0 * 60.0 * 1000.0</property><!-- one day -->
+
+  <!-- Global parameters (affect multiple tables)-->
+  <property name="NULL_CHANCE" type="double">0.00025</property>
+
+  <!-- serial keys like customer_sk date_sk etc.. start at 0 or at 1 or... -->
+  <property name="${SK_ID_OFFSET}" type="double">0</property>
+
+  <!-- customer -->
+  <property name="${preferred_cust_likelihood}" type="double">0.01</property>
+
+  <!-- address (used in various tables) -->
+  <property name="${address_street_number_min}" type="double">1.0</property>
+  <property name="${address_street_number_max}" type="double">1000.0</property>
+  <property name="${address_suite_number_min}" type="double">1.0</property>
+  <property name="${address_suite_number_max}" type="double">10.0</property>
+  <property name="${address_zip_min}" type="double">10000.0</property>
+  <property name="${address_zip_max}" type="double">99999.0</property>
+
+  <!-- Constants for Use-Case 02 (Speech Recognition) -->
+  <property name="CONVERSATION_AUDIO_SIZE">Math.max(100.0, Math.sqrt(${SF} * 30) * 100 * ${TTVF})</property>
+
+  <!-- order_returns -->
+  <property name="${OR_return_web_sale_likelihood}" type="double">0.1</property>
+
+  <!-- <property name="${customer_size}" type="long">100000.0d * ${SF_sqrt}</property> -->
+  <property name="${customer_address_size}" type="long">${CUSTOMER_SIZE} / 2</property>
+  <property name="${order_returns_size}" type="long">${OR_return_web_sale_likelihood} * ${ORDER_SIZE}</property>
+
+  <!-- Each row in this table represents a single lineitem for the return of an
+       item sold through the web sales channel and recorded in the web_returns
+       table -->
+  <table name="order_returns">
+    <size>${order_returns_size}</size>
+
+    <field name="or_order_id" size="19" type="BIGINT" primary="true">
+      <gen_ReferenceValue id="orderChooser" choose="permutationRandom" from="historical">
+        <reference table="lineitem" field="li_order_id" />
+      </gen_ReferenceValue>
+    </field>
+
+    <field name="or_product_id" size="19" type="BIGINT" primary="true">
+      <gen_RandomListItems id="listIndexChooser">
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="or_order_id" generatorByID="orderChooser"/>
+          <reference table="lineitem" field="li_product_id" />
+        </gen_ReferenceValue>
+      </gen_RandomListItems>
+    </field>
+
+    <field name="or_return_quantity" size="10" type="INTEGER" primary="false">
+      <gen_ExtendedFormula>
+        <formula>parent.getRandomSample(1L,((long)generator[0])+1L, random)</formula>
+        <decimalPlaces>0</decimalPlaces>
+        <gen_RandomListItems>
+          <sameChoiceAs field="or_product_id" generatorByID="listIndexChooser" />
+          <gen_ReferenceValue choose="sameChoiceAs" from="">
+            <sameChoiceAs field="or_order_id" generatorByID="orderChooser"/>
+            <reference table="lineitem" field="quantity" />
+          </gen_ReferenceValue>
+        </gen_RandomListItems>
+      </gen_ExtendedFormula>
+    </field>
+  </table>
+
+  <table name="name">
+    <size>${CUSTOMER_SIZE}</size>
+
+    <field name="n_name_id" type="NUMERIC">
+      <gen_Id>
+        <min>${SK_ID_OFFSET}</min>
+      </gen_Id>
+    </field>
+
+    <field name="n_first_name" size="20" type="CHAR" primary="false">
+      <gen_DictList>
+        <file>dicts/tpcxai/Given-Names-Random.dict</file>
+        <disableRng>true</disableRng>
+      </gen_DictList>
+    </field>
+
+    <field name="n_last_name" size="30" type="CHAR" primary="false">
+      <gen_DictList>
+        <file>dicts/tpcxai/Family-Names-Random.dict</file>
+        <disableRng>true</disableRng>
+      </gen_DictList>
+    </field>
+  </table>
+
+  <!-- Each row in this dimension table represents a customer -->
+  <table name="customer">
+    <size>${CUSTOMER_SIZE}</size>
+
+    <field name="c_customer_sk" size="19" type="BIGINT" primary="true">
+      <gen_ReferenceValue choose="directRowMapping" from="historical" id="namePicker">
+        <reference table="name" field="n_name_id" />
+      </gen_ReferenceValue>
+    </field>
+
+    <field name="c_customer_id" size="16" type="CHAR" primary="false">
+      <gen_ConvertNumberToString>
+        <gen_OtherFieldValue>
+          <reference field="c_customer_sk" />
+        </gen_OtherFieldValue>
+        <size>16.0</size>
+        <characters>ABCDEFGHIJKLMNOPQRSTUVWXYZ</characters>
+      </gen_ConvertNumberToString>
+    </field>
+
+    <!-- FK ca_address_sk -->
+    <field name="c_current_addr_sk" size="19" type="BIGINT" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_ReferenceValue choose="random" from="historical">
+          <reference table="customer_address" field="ca_address_sk" />
+        </gen_ReferenceValue>
+      </gen_Null>
+    </field>
+
+    <field name="c_first_name" size="20" type="CHAR" primary="false">
+      <gen_ReferenceValue choose="sameChoiceAs" from="">
+        <sameChoiceAs field="c_customer_sk" generatorByID="namePicker" />
+        <reference table="name" field="n_first_name" />
+      </gen_ReferenceValue>
+    </field>
+
+    <field name="c_last_name" size="30" type="CHAR" primary="false">
+       <gen_ReferenceValue choose="sameChoiceAs" from="">
+        <sameChoiceAs field="c_customer_sk" generatorByID="namePicker" />
+        <reference table="name" field="n_last_name" />
+      </gen_ReferenceValue>     
+    </field>
+
+    <field name="c_preferred_cust_flag" size="1" type="CHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_Probability>
+          <probability value="${preferred_cust_likelihood}">
+            <gen_StaticValue>
+              <value>Y</value>
+            </gen_StaticValue>
+          </probability>
+          <probability value="1 - ${preferred_cust_likelihood}">
+            <gen_StaticValue>
+              <value>N</value>
+            </gen_StaticValue>
+          </probability>
+        </gen_Probability>
+      </gen_Null>
+    </field>
+
+    <field name="c_birth_day" size="10" type="INTEGER" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_LongNumber>
+          <min>1.0</min>
+          <max>31.0</max>
+        </gen_LongNumber>
+      </gen_Null>
+    </field>
+
+    <field name="c_birth_month" size="10" type="INTEGER" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_LongNumber>
+          <min>1.0</min>
+          <max>12.0</max>
+        </gen_LongNumber>
+      </gen_Null>
+    </field>
+
+    <field name="c_birth_year" size="10" type="INTEGER" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_LongNumber>
+          <min>1930.0</min>
+          <max>2002.0</max>
+        </gen_LongNumber>
+      </gen_Null>
+    </field>
+
+    <!-- used by Q6 -->
+    <field name="c_birth_country" size="20" type="VARCHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="countries" valueColumn="0" weightColumn="0" />
+      </gen_Null>
+    </field>
+
+    <!-- used by Q6 -->
+    <field name="c_login" size="13" type="CHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_RandomString>
+          <min>1.0</min>
+          <max>13.0</max>
+        </gen_RandomString>
+      </gen_Null>
+    </field>
+
+    <!-- used by Q6 -->
+    <field name="c_email_address" size="50" type="CHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_Email>
+          <file>dicts/tpcxai/mail_provider.dict</file>
+          <reference id="lastname" field="c_last_name"/>
+          <reference id="firstname" field="c_first_name"/>
+        </gen_Email>
+      </gen_Null>
+    </field>
+    <field name="c_cluster_id" type="NUMERIC">
+      <gen_StaticValue>
+        <value>1</value>
+      </gen_StaticValue>
+    </field>
+  </table>
+
+
+  <!-- Each row in this table represents a unique customer address (each customer can have more than one address) -->
+  <table name="customer_address">
+    <size>${customer_address_size}</size>
+
+    <!-- used by Q7, Q9, Q17 -->
+    <field name="ca_address_sk" size="19" type="BIGINT" primary="true">
+      <gen_Id> <min>${SK_ID_OFFSET}</min> </gen_Id>
+    </field>
+
+    <field name="ca_address_id" size="16" type="CHAR" primary="false">
+      <gen_ConvertNumberToString>
+        <gen_Id/>
+        <size>16.0</size>
+        <characters>ABCDEFGHIJKLMNOPQRSTUVWXYZ</characters>
+      </gen_ConvertNumberToString>
+    </field>
+
+    <field name="ca_street_number" size="10" type="CHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_LongNumber>
+          <min>${address_street_number_min}</min>
+          <max>${address_street_number_max}</max>
+        </gen_LongNumber>
+      </gen_Null>
+    </field>
+
+    <field name="ca_street_name" size="60" type="VARCHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_Probability>
+          <probability value="0.5">
+            <gen_Sequential concatenateResults="true" delimiter=" ">
+              <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="street_names" valueColumn="0" weightColumn="0" />
+              <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="street_names" valueColumn="0" weightColumn="0" />
+            </gen_Sequential>
+          </probability>
+          <probability value="0.5">
+            <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="street_names" valueColumn="0" weightColumn="0" />
+          </probability>
+        </gen_Probability>
+      </gen_Null>
+    </field>
+
+    <field name="ca_street_type" size="15" type="CHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="street_type" valueColumn="0" weightColumn="0" />
+      </gen_Null>
+    </field>
+
+    <field name="ca_suite_number" size="10" type="CHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_RandomString>
+          <min>${address_suite_number_min}</min>
+          <max>${address_suite_number_max}</max>
+        </gen_RandomString>
+      </gen_Null>
+    </field>
+
+    <field name="ca_city" size="60" type="VARCHAR" primary="false">
+      <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="cities" valueColumn="0" weightColumn="0" />
+    </field>
+
+    <!-- used by Q9 -->
+    <field name="ca_county" size="30" type="VARCHAR" primary="false">
+      <gen_WeightedListItem id="countyChooser" filename="dicts/tpcxai/ds-genProbabilities.txt" list="fips_county" valueColumn="county" weightColumn="uniform" />
+    </field>
+
+    <!-- used by Q7, Q9 -->
+    <field name="ca_state" size="2" type="CHAR" primary="false">
+      <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="fips_county" valueColumn="st" weightColumn="uniform">
+        <sameChoiceAs field="ca_county" generatorByID="countyChooser"/>
+      </gen_WeightedListItem>
+    </field>
+
+    <field name="ca_zip" size="10" type="CHAR" primary="false">
+      <gen_Null probability="${NULL_CHANCE}">
+        <gen_LongNumber>
+          <min>${address_zip_min}</min>
+          <max>${address_zip_max}</max>
+        </gen_LongNumber>
+      </gen_Null>
+    </field>
+
+    <field name="ca_country" size="20" type="VARCHAR" primary="false">
+      <gen_StaticValue>
+        <value>United States</value>
+      </gen_StaticValue>
+    </field>
+
+    <!-- used by Q17 -->
+    <!-- decimalSize="5,2"-->
+    <field name="ca_gmt_offset" size="5" type="NUMERIC" primary="false">
+      <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="fips_county" valueColumn="gmt" weightColumn="uniform">
+        <sameChoiceAs field="ca_county" generatorByID="countyChooser"/>
+      </gen_WeightedListItem>
+    </field>
+
+    <field name="ca_location_type" size="20" type="CHAR" primary="false">
+      <gen_WeightedListItem filename="dicts/tpcxai/ds-genProbabilities.txt" list="location_type" valueColumn="0" weightColumn="0" />
+    </field>
+  </table>
+
+  <table name="CUSTOMER">
+  	<!-- if tables should scale with -SF command line argument. Specify your scaling formula here: -->
+  	<size>${CUSTOMER_WITH_IMAGES_SIZE}</size>
+
+  	<field name="id" size="10" type="NUMERIC">
+  		<gen_Id/>
+  	</field>
+  	<field name="lastname" size="50" type="VARCHAR" >
+  		<gen_DictList>
+  			<disableRng>true</disableRng>
+  			<file>dicts/tpcxai/Family-Names.dict</file>
+  		</gen_DictList>
+  	</field>
+  	<field name="firstname" size="50" type="VARCHAR">
+  		<gen_DictList>
+  			<disableRng>true</disableRng>
+  			<file>dicts/tpcxai/Given-Names.dict</file>
+  		</gen_DictList>
+  	</field>
+  </table>
+
+  <table name="CUSTOMER_IMAGES">
+    <size>${CUSTOMER_WITH_IMAGES_SIZE} * ${NUMBER_OF_IMAGES_PER_ID}</size>
+     <field name="identity_serving" type="NUMERIC">
+      <gen_ReferenceValue choose="sameChoiceAs" from="">
+        <sameChoiceAs field="identity" generatorByID="customerChooser" />
+        <reference table="customer" field="c_customer_id" />
+      </gen_ReferenceValue>
+     </field>
+     <field name="identity" type="VARCHAR">
+      <gen_Sequential concatenateResults="true" delimiter="_">
+        <gen_ReferenceValue choose="idFromSubGenerator" from="historical" id="customerChooser">
+          <gen_LongNumber>
+            <min>0</min>
+            <max>${CUSTOMER_WITH_IMAGES_SIZE} - 1</max>
+          </gen_LongNumber>
+          <reference table="customer" field="c_first_name" />
+        </gen_ReferenceValue>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="identity" generatorByID="customerChooser" />
+          <reference table="customer" field="c_last_name" />
+        </gen_ReferenceValue>
+      </gen_Sequential>
+    </field>
+    <field name="sample" type="NUMERIC">
+      <gen_Id>
+        <min>1</min>
+      </gen_Id>
+    </field>
+    <field name="height" type="NUMERIC">
+      <gen_LongNumber>
+        <min>100</min>
+        <max>1080</max>
+      </gen_LongNumber>
+    </field>
+    <field name="image" type="BLOB">
+      <gen_FaceImage>
+        <modelFile>dicts/tpcxai/bmfm_2020.h5</modelFile>
+        <identity>
+          <gen_OtherFieldValue>
+            <reference field="identity_serving" />
+          </gen_OtherFieldValue>
+        </identity>
+        <width>
+          <gen_Formula>
+            <gen_OtherFieldValue>
+              <reference field="height" />
+            </gen_OtherFieldValue>
+            <formula>generator[0] * 4/3</formula> <!-- aspect ratio 4:3 -->
+          </gen_Formula>
+        </width>
+        <height>
+          <gen_OtherFieldValue>
+            <reference field="height" />
+          </gen_OtherFieldValue>
+        </height>
+        <roll>
+          <gen_DoubleNumber>
+            <minD>-0.1</minD>
+            <maxD>0.1</maxD>
+            <decimalPlaces>4</decimalPlaces>
+          </gen_DoubleNumber>
+        </roll>
+        <pitch>
+          <gen_DoubleNumber>
+            <minD>-0.1</minD>
+            <maxD>0.1</maxD>
+            <decimalPlaces>4</decimalPlaces>
+          </gen_DoubleNumber>
+        </pitch>
+        <yaw>
+          <gen_DoubleNumber>
+            <minD>-0.2</minD>
+            <maxD>0.2</maxD>
+            <decimalPlaces>4</decimalPlaces>
+          </gen_DoubleNumber>
+        </yaw>
+      </gen_FaceImage>
+    </field>
+  </table>
+
+  <table name="CUSTOMER_IMAGES_META">
+    <size>${CUSTOMER_WITH_IMAGES_SIZE} * ${NUMBER_OF_IMAGES_PER_ID}</size>
+    <field name="identity" type="VARCHAR">
+      <gen_ReferenceValue choose="directRowMapping" from="historical" id="customer_img_chooser">
+        <reference table="CUSTOMER_IMAGES" field="identity" />
+      </gen_ReferenceValue>
+    </field>
+    <field name="identity_serving" type="NUMERIC">
+      <gen_ReferenceValue choose="sameChoiceAs" from="">
+        <sameChoiceAs field="identity" generatorByID="customer_img_chooser" />
+        <reference table="CUSTOMER_IMAGES" field="identity_serving" />
+      </gen_ReferenceValue>
+    </field>
+    <field name="sample" type="VARCHAR">
+      <gen_ReferenceValue choose="sameChoiceAs" from="">
+        <sameChoiceAs field="identity" generatorByID="customer_img_chooser" />
+        <reference table="CUSTOMER_IMAGES" field="sample" />
+      </gen_ReferenceValue>
+    </field>
+    <field name="img_filename" type="VARCHAR">
+      <gen_Sequential concatenateResults="true" delimiter="/">
+        <gen_StaticValue>
+          <value>CUSTOMER_IMAGES</value>
+        </gen_StaticValue>
+        <gen_If>
+          <if>${includeLabels} == 1.0</if>
+          <then>
+            <gen_OtherFieldValue>
+              <reference field="identity" />
+            </gen_OtherFieldValue>
+          </then>
+          <else>
+            <gen_OtherFieldValue>
+              <reference field="identity_serving" />
+            </gen_OtherFieldValue>
+          </else>
+        </gen_If>
+        <gen_OtherFieldValue>
+          <reference field="sample" />
+        </gen_OtherFieldValue>
+      </gen_Sequential>
+    </field>
+  </table>
+  
+  <table name="marketplace">
+    <size>${CUSTOMER_SIZE}</size>
+
+    <field name="id" type="NUMERIC">
+      <gen_Id>
+        <min>1</min>
+      </gen_Id>
+    </field>
+    <field name="price" type="NUMERIC">
+      <gen_DoubleNumber>
+        <decimalPlaces>2</decimalPlaces>
+        <minD>
+          <gen_WeightedListItem filename="dicts/tpcxai/categories.dict"
+                                list="categories" valueColumn="min_price" weightColumn="frequency">
+            <sameChoiceAs field="category" generatorByID="category_gen" />
+          </gen_WeightedListItem>
+        </minD>
+        <maxD>
+          <gen_WeightedListItem filename="dicts/tpcxai/categories.dict"
+                                list="categories" valueColumn="max_price" weightColumn="frequency">
+            <sameChoiceAs field="category" generatorByID="category_gen" />
+          </gen_WeightedListItem>
+        </maxD>
+      </gen_DoubleNumber>
+    </field>
+
+    <field name="category" type="VARCHAR">
+      <gen_WeightedListItem filename="dicts/tpcxai/categories.dict"
+                            list="categories" valueColumn="category" weightColumn="frequency" id="category_gen" />
+    </field>
+
+    <field name="sub_category" type="VARCHAR">
+      <gen_WeightedListItem filename="dicts/tpcxai/categories.dict"
+                            list="categories" valueColumn="sub_category" weightColumn="frequency">
+        <sameChoiceAs field="category" generatorByID="category_gen" />
+      </gen_WeightedListItem>
+    </field>
+
+    <field name="condition" type="NUMERIC">
+      <gen_WeightedListItem filename="dicts/tpcxai/categories.dict"
+                            list="categories" valueColumn="condition" weightColumn="frequency">
+        <sameChoiceAs field="category" generatorByID="category_gen" />
+      </gen_WeightedListItem>
+    </field>
+
+    <!-- <field name="brand"> -->
+
+    <!-- </field> -->
+
+    <!-- <field name="product_name"> -->
+
+    <!-- </field> -->
+
+    <field name="description" type="VARCHAR">
+      <gen_ConditionalMarkovChainText>
+        <min>5</min>
+        <max>1000</max>
+        <markovChainsPath>dicts/tpcxai/models/product_description/</markovChainsPath>
+        <gen_OtherFieldValue>
+          <reference field="category" />
+        </gen_OtherFieldValue>
+        <gen_OtherFieldValue>
+          <reference field="sub_category" />
+        </gen_OtherFieldValue>
+        <gen_OtherFieldValue>
+          <reference field="condition" />
+        </gen_OtherFieldValue>
+        <default>
+          <gen_StaticValue>
+            <value>UNKNOWN</value>
+          </gen_StaticValue>
+        </default>
+      </gen_ConditionalMarkovChainText>
+    </field>
+  </table>
+
+  <table name="conversation">
+    <size>${CUSTOMER_SIZE}</size>
+    <field name="UserID" type="NUMERIC">
+      <gen_Id/>
+    </field>
+    <field name="numberOfQuestionAnswerPairs" type="NUMERIC">
+      <gen_LongNumber>
+	      <min>1</min>
+	      <max>20</max>
+      </gen_LongNumber>
+    </field>
+    <field name="question" type="VARCHAR">
+      <gen_For resultsToList="true">
+	      <i>	  
+	        <gen_OtherFieldValue>
+            <reference field="numberOfQuestionAnswerPairs"/>
+          </gen_OtherFieldValue>
+	      </i>
+	      <do>
+	        <gen_MarkovChainText>
+	          <file>dicts/tpcxai/question.bin</file>
+	          <!-- Number of words per question random between [1,1000] words -->
+            <min>1</min>
+	          <max>1000</max>
+	        </gen_MarkovChainText>
+	      </do>
+      </gen_For>
+    </field>
+    <field name ="answer" type="VARCHAR">
+      <gen_For resultsToList="true">
+	      <i>	  
+	        <gen_OtherFieldValue>
+            <reference field="numberOfQuestionAnswerPairs"/>
+          </gen_OtherFieldValue>
+	      </i>
+	      <do>
+	        <gen_MarkovChainText>
+	          <file>dicts/tpcxai/answer.bin</file>
+	          <!-- Number of words per answer random between [1,1000] words -->
+            <min>1</min>
+	          <max>1000</max>
+	        </gen_MarkovChainText>
+	      </do>
+      </gen_For>
+    </field>  
+  </table>
+
+  <table name="CONVERSATION_AUDIO">
+    <size>${CONVERSATION_AUDIO_SIZE}</size>
+    <field name="id" type="NUMERIC">
+      <gen_Id>
+        <min>1</min>
+      </gen_Id>
+    </field>
+    <field name="dir" type="VARCHAR">
+      <gen_StaticValue>
+        <value>wavs</value>
+      </gen_StaticValue>
+    </field>
+    <field name="rel_path" type="VARCHAR">
+      <gen_Sequential concatenateResults="true" delimiter="/">
+        <gen_StaticValue>
+          <value>CONVERSATION_AUDIO</value>
+        </gen_StaticValue>
+        <gen_OtherFieldValue>
+          <reference field="dir" />
+        </gen_OtherFieldValue>
+        <gen_PrePostfix>
+          <postfix>.wav</postfix>
+          <gen_OtherFieldValue>
+            <reference field="id" />
+          </gen_OtherFieldValue>
+        </gen_PrePostfix>
+      </gen_Sequential>
+    </field>
+    <field name="text" type="VARCHAR">
+      <gen_MarkovChainText>
+        <file>dicts/tpcxai/answer.bin</file>
+        <min>1</min>
+        <max>50</max>
+      </gen_MarkovChainText>
+    </field>
+    <field name="voice" type="VARCHAR">
+      <gen_Probability>
+        <probability value="1.0">
+          <gen_StaticValue>
+            <value>cmu-rms-hsmm</value>
+          </gen_StaticValue>
+        </probability>
+        <probability value="0.0">
+          <gen_StaticValue>
+            <value>cmu-bdl-hsmm</value>
+          </gen_StaticValue>
+        </probability>
+        <probability value="0.0">
+          <gen_StaticValue>
+            <value>dfki-prudence-hsmm</value>
+          </gen_StaticValue>
+        </probability>
+      </gen_Probability>
+    </field>
+    <field name="audio" type="BLOB">
+      <gen_Speech>
+        <text>
+          <gen_OtherFieldValue>
+            <reference field="text" />
+          </gen_OtherFieldValue>
+        </text>
+        <voice>
+          <gen_OtherFieldValue>
+            <reference field="voice" />
+          </gen_OtherFieldValue>
+        </voice>
+        <ignoreErrors>true</ignoreErrors>
+      </gen_Speech>
+    </field>
+  </table>
+
+  <table name = "financial_account">
+    <size>${FINANCIAL_CUSTOMER_SIZE}</size>
+    
+    <field name="fa_customer_sk" type="NUMERIC">
+      <gen_ReferenceValue choose="random" from="historical">
+        <reference table="customer" field="c_customer_sk" />
+      </gen_ReferenceValue>
+    </field>
+    
+    <!-- value 1 means customer is fraud victim -->
+    <field name="Fraudster_tmp" type="NUMERIC">
+      <gen_Probability>
+	      <probability value="${ISFRAUDED}">
+	        <gen_StaticValue>
+	          <value>1</value>
+	        </gen_StaticValue>
+	      </probability>
+	      <probability value="1-${ISFRAUDED}">
+	        <gen_StaticValue>
+	          <value>0</value>
+	        </gen_StaticValue>
+	      </probability>
+      </gen_Probability>
+    </field>
+    
+    <field name="transaction_limit" type="NUMERIC">
+      <gen_DoubleNumber>
+	      <minD>1000</minD>
+        <maxD>20000</maxD>
+        <decimalPlaces>2</decimalPlaces>
+	      <distribution name="Normal" sd="3000" mean="6000"/>
+      </gen_DoubleNumber>	
+    </field>
+    
+    <field name="fraud_type_tmp" type="NUMERIC">
+      <gen_Probability>
+	      <probability value="0.5">
+	        <gen_StaticValue>
+	          <value>0815</value>
+	        </gen_StaticValue>
+	      </probability>
+	      <probability value="0.5">
+	        <gen_StaticValue>
+	          <value>0817</value>
+	        </gen_StaticValue>
+	      </probability>
+      </gen_Probability>
+    </field>
+  </table>
+
+   <table name="financial_transactions">
+     <size>${FINANCIAL_TRANSACTION_SIZE}</size>
+
+     <field name="amount" type="NUMERIC">
+	     <gen_If>
+         <gen_OtherFieldValue>
+           <reference field="isFraud" />
+         </gen_OtherFieldValue>
+	       <!--normal customer-->
+	       <if><![CDATA[((Number) generator[0]).longValue() == 0]]></if>
+	       <then>
+           <gen_Probability>
+             <probability value="0.8">
+	             <gen_DoubleNumber>
+		             <minD>0.01</minD>
+		             <maxD>
+                   <gen_ReferenceValue choose="sameChoiceAs" from="">
+                     <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+			               <reference table="financial_account" field="transaction_limit" />
+		               </gen_ReferenceValue>
+		             </maxD>
+		             <decimalPlaces>2</decimalPlaces>
+		             <distribution name="Normal" sd="495" mean="500"/>
+               </gen_DoubleNumber>
+             </probability>
+             <probability value="0.2">
+               <gen_DoubleNumber>
+                 <minD>
+                   <gen_Formula>
+                     <gen_ReferenceValue choose="sameChoiceAs" from="">
+                       <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+			                 <reference table="financial_account" field="transaction_limit" />
+		                 </gen_ReferenceValue>
+                     <formula>generator[0] / 4 * 3</formula>
+                   </gen_Formula>
+                 </minD>
+                 <maxD>
+                   <gen_ReferenceValue choose="sameChoiceAs" from="">
+                     <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+			               <reference table="financial_account" field="transaction_limit" />
+		               </gen_ReferenceValue>
+                 </maxD>
+               </gen_DoubleNumber>
+             </probability>
+           </gen_Probability>
+	       </then>
+	       <!--customer is frauded-->
+	       <else>
+	         <gen_If>
+		         <gen_ReferenceValue choose="sameChoiceAs" from="">
+               <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+	             <reference table="financial_account" field="fraud_type_tmp" />
+		         </gen_ReferenceValue>
+		         <if><![CDATA[((Number) generator[0]).longValue() == 0815]]></if>
+		         <then>
+	             <gen_Probability>
+		             <probability value="0.02">
+		               <gen_DoubleNumber>
+		                 <minD>0.01</minD>
+		                 <maxD>
+		                   <gen_ReferenceValue choose="sameChoiceAs" from="">
+                         <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+			                   <reference table="financial_account" field="transaction_limit" />
+		                   </gen_ReferenceValue>
+		                 </maxD>
+		                 <decimalPlaces>2</decimalPlaces>
+		               </gen_DoubleNumber>
+		             </probability>
+		             <probability value="0.98">
+                   <gen_DoubleNumber>
+                     <minD>
+                       <gen_Formula>
+                         <gen_ReferenceValue choose="sameChoiceAs" from="">
+                           <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+			                     <reference table="financial_account" field="transaction_limit" />
+		                     </gen_ReferenceValue>
+                         <formula>generator[0] / 2</formula>
+                       </gen_Formula>
+                     </minD>
+                     <maxD>
+		                   <gen_ReferenceValue choose="sameChoiceAs" from="">
+                         <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+			                   <reference table="financial_account" field="transaction_limit" />
+		                   </gen_ReferenceValue>
+                     </maxD>
+		               </gen_DoubleNumber>
+		             </probability>
+	             </gen_Probability>
+		         </then>
+		         <else>
+		           <gen_DoubleNumber>
+		             <minD>0.01</minD>
+		             <maxD>
+		               <gen_ReferenceValue choose="sameChoiceAs" from="">
+                     <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+			               <reference table="financial_account" field="transaction_limit" />
+		               </gen_ReferenceValue>
+		             </maxD>
+		             <decimalPlaces>2</decimalPlaces>
+		             <distribution name="Normal" sd="0.5" mean="2"/>
+		           </gen_DoubleNumber>
+		         </else>
+	         </gen_If>
+	       </else>
+	     </gen_If>
+     </field>
+       
+     <field name="IBAN" type="VARCHAR">
+       <gen_Sequential>
+	       <gen_LongNumber>
+	         <min>1</min>
+	         <max>99999999</max>
+	       </gen_LongNumber>	  
+         <gen_Padding>
+           <character>0</character>
+           <size>12</size>
+           <padToLeft>true</padToLeft>
+         </gen_Padding>
+	       <!-- add DE prefix -->
+         <gen_PrePostfix>
+           <prefix>DE4875</prefix>-->
+         </gen_PrePostfix>
+       </gen_Sequential>
+     </field>
+     
+     <field name="senderID" type="NUMERIC">
+       <gen_ReferenceValue choose="random" from="historical" id="fa_customer_picker">
+	       <reference table="financial_account" field ="fa_customer_sk"/>
+       </gen_ReferenceValue>
+     </field>
+    
+
+     <!--half of the receivers are from the same institution-->
+     <field name="receiverID" type="VARCHAR">
+	     <gen_Probability>
+	       <probability value="0.5">
+	         <gen_ReferenceValue choose="random" from="historical">
+		         <reference table="financial_account" field ="fa_customer_sk"/>
+	         </gen_ReferenceValue>
+	       </probability>
+	       <probability value="0.5">
+	         <gen_Sequential>
+		         <gen_LongNumber>
+		           <min>10000</min>
+		           <max>100000000</max>
+		         </gen_LongNumber>
+		         <gen_PrePostfix>
+		           <prefix>FOR</prefix>
+		         </gen_PrePostfix>
+	         </gen_Sequential>
+	       </probability>
+	     </gen_Probability>
+     </field>
+
+     <field name="transactionID" type="NUMERIC">
+	     <gen_LongNumber>
+	       <min>1</min>
+	       <max>999999999999</max>
+	     </gen_LongNumber>	
+     </field>
+
+     <field name="isFraud" type="NUMERIC">      
+       <gen_If>
+	       <gen_ReferenceValue choose="sameChoiceAs" from="">
+           <sameChoiceAs field="senderID" generatorByID="fa_customer_picker" />
+	         <reference table="financial_account" field="Fraudster_tmp" />
+         </gen_ReferenceValue>
+	       <!--normal customer-->
+	       <if><![CDATA[((Number) generator[0]).longValue() == 0]]></if>
+	       <then>
+	         <gen_StaticValue>
+		         <value>0</value>
+	         </gen_StaticValue>
+	       </then>
+	       <else>
+	         <gen_Probability>
+		         <probability value="0.5">
+		           <gen_StaticValue>
+		             <value>0</value>
+		           </gen_StaticValue>
+		         </probability>
+		         <probability value="0.5">
+		           <gen_StaticValue>
+		             <value>1</value>
+		           </gen_StaticValue>
+		         </probability>
+	         </gen_Probability>
+	       </else>
+	     </gen_If>
+     </field>
+
+     <field name="time" type="NUMERIC">
+       <gen_If>
+	       <gen_OtherFieldValue>
+	         <reference field="isFraud" />
+         </gen_OtherFieldValue>
+	       <!--customer is frauded-->
+	       <if><![CDATA[((Number) generator[0]).longValue() == 1]]></if>
+	       <then>
+	         <gen_Template>
+	           <!--transaction at night-->
+	           <gen_LongNumber>
+		           <min>0</min>
+		           <max>23</max>
+		           <distribution name="Normal" sd="4" mean="2"/>
+	           </gen_LongNumber>
+	           <gen_DateTime>
+		           <outputFormat>yyyy-MM-dd</outputFormat>
+		           <inputFormat>yyyy-MM-dd</inputFormat>
+		           <startDate>${START_DATE}</startDate>
+		           <endDate>${END_DATE}</endDate>
+               <useFixedStepSize>true</useFixedStepSize>
+	           </gen_DateTime>
+	           <gen_FormatString>
+		           <format>%02d</format>
+		           <gen_LongNumber>
+		             <min>0</min>
+		             <max>59</max>
+		           </gen_LongNumber>
+             </gen_FormatString>
+	           <getValue>
+		           <![CDATA[
+			                  
+			                  long hour = generator[0].getLongValue();			
+			                  String date = generator[1].getValue().toString();
+			                  
+			                  java.text.DecimalFormat df = new java.text.DecimalFormat("00");
+			                  String hourStr = df.format(hour);
+			                  String minuteStr = generator[2].getValue().toString();
+
+String dateStr = date + 'T' + hourStr + ":" + minuteStr + ":00";
+java.time.LocalDateTime date = java.time.LocalDateTime.parse(dateStr, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+fvdto.setBothValues(date);
+		           ]]>
+	           </getValue>
+	         </gen_Template>
+	       </then>
+	       <else>
+	         <gen_Template>
+	           <!--transaction during the day-->
+	           <gen_LongNumber>
+		           <min>0</min>
+		           <max>23</max>
+		           <distribution name="Normal" sd="3" mean="12"/>
+	           </gen_LongNumber>
+	           <gen_DateTime>
+		           <outputFormat>yyyy-MM-dd</outputFormat>
+		           <inputFormat>yyyy-MM-dd</inputFormat>
+		           <startDate>${START_DATE}</startDate>
+		           <endDate>${END_DATE}</endDate>
+               <useFixedStepSize>true</useFixedStepSize>
+	           </gen_DateTime>
+	           <gen_FormatString>
+		           <format>%02d</format>
+		           <gen_LongNumber>
+		             <min>0</min>
+		             <max>59</max>
+		           </gen_LongNumber>
+             </gen_FormatString>
+	           <getValue>
+		           <![CDATA[
+			                  
+			                  long hour = generator[0].getLongValue();			
+			                  String date = generator[1].getValue().toString();
+			                  java.text.DecimalFormat df = new java.text.DecimalFormat("00");
+			                  String hourStr = df.format(hour);
+			                  String minuteStr = generator[2].getValue().toString();
+
+String dateStr = date + 'T' + hourStr + ":" + minuteStr+ ":00";
+java.time.LocalDateTime date = java.time.LocalDateTime.parse(dateStr, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+fvdto.setBothValues(date);
+		           ]]>
+	           </getValue>
+	         </gen_Template>
+	       </else>
+       </gen_If>
+     </field>
+   </table>
+   
+   <table name = "ProductRating">
+     <size>${NUMBEROFUSERS}</size>
+     <field name="userID" type="VARCHAR">
+       <gen_Id/>
+     </field>
+     <field name="mainProductCategory_tmp" type="NUMERIC">
+       <gen_LongNumber>
+	       <min>0</min>
+	       <max>8</max>
+       </gen_LongNumber>
+     </field>
+     <field name="numberOfProducts_tmp" type="NUMERIC">
+       <gen_LongNumber>
+	       <min>1</min>
+	       <max>${NUMBEROFPRODUCTS}/250</max>
+	       <distribution mean="${RATINGSPERCUSTOMER}" name="Normal" sd="${RATINGSPERCUSTOMER}/2"/>
+       </gen_LongNumber>
+     </field>      
+     <field name="productisInMainCategory_tmp" type="NUMERIC">
+       <gen_For resultsToList="true">
+	       <i>	  
+	         <gen_OtherFieldValue>
+             <reference field="numberOfProducts_tmp" />
+           </gen_OtherFieldValue>
+	       </i>
+	       <do>
+	         <gen_Probability>
+	           <probability value="0.9">
+	             <gen_StaticValue>
+		             <value>
+		               1
+		             </value>
+	             </gen_StaticValue>
+	           </probability>
+	           <probability value="0.1">
+	             <gen_StaticValue>
+		             <value>
+		               0
+		             </value>
+	             </gen_StaticValue>
+	           </probability>
+	         </gen_Probability>
+	       </do>
+       </gen_For>
+     </field>
+     <field name="productID" type="NUMERIC">
+       <gen_For resultsToList="true" listName="productIDs">
+	       <i>	  
+	         <gen_OtherFieldValue>
+             <reference field="numberOfProducts_tmp" />
+           </gen_OtherFieldValue>
+	       </i>
+	       <do>
+	         <gen_If>
+	           <gen_OtherFieldValue>
+	             <reference field="productisInMainCategory_tmp" />
+             </gen_OtherFieldValue>
+	           <!--product is in main catgory-->
+	           <if><![CDATA[((Number) generator[0]).longValue() == 1]]></if>
+	           <then>
+	             <gen_Switch>
+		             <gen_OtherFieldValue>
+		               <reference field="mainProductCategory_tmp" />
+		             </gen_OtherFieldValue>
+		             <case value="0">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT0}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT0}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="1">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT1}</min>
+			                   <max>${MAXVALUECAT1}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT1}</min>
+			                   <max>${MAXVALUECAT1}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="2">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT2}</min>
+			                   <max>${MAXVALUECAT2}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT2}</min>
+			                   <max>${MAXVALUECAT2}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="3">             
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT3}</min>
+			                   <max>${MAXVALUECAT3}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT3}</min>
+			                   <max>${MAXVALUECAT3}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="4">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT4}</min>
+			                   <max>${MAXVALUECAT4}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT4}</min>
+			                   <max>${MAXVALUECAT4}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="5">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT5}</min>
+			                   <max>${MAXVALUECAT5}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT5}</min>
+			                   <max>${MAXVALUECAT5}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="6">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT6}</min>
+			                   <max>${MAXVALUECAT6}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT6}</min>
+			                   <max>${MAXVALUECAT6}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="7">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT7}</min>
+			                   <max>${MAXVALUECAT7}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT7}</min>
+			                   <max>${MAXVALUECAT7}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="8">
+		               <gen_Probability>
+		                 <probability value="0.8">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT8}</min>
+			                   <max>${MAXVALUECAT8}</max>
+			                   <distinct>${NUMBEROFMAINPRODUCTS}</distinct>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.2">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT8}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+               </gen_Switch>
+	           </then>
+	           <!--product is not in main category-->
+	           <else>
+	             <gen_Switch>
+		             <gen_OtherFieldValue>
+		               <reference field="mainProductCategory_tmp" />
+		             </gen_OtherFieldValue>
+		             <case value="0">
+		               <gen_LongNumber>
+		                 <min>${MINVALUECAT1}</min>
+		                 <max>${MAXVALUECAT8}</max>
+		               </gen_LongNumber>
+		             </case>
+		             <case value="1">
+		               <gen_Probability>
+		                 <probability value="0.125">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT0}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.875">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT2}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="2">
+		               <gen_Probability>
+		                 <probability value="0.25">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT1}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.75">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT3}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="3">
+		               <gen_Probability>
+		                 <probability value="0.375">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT2}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.625">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT4}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="4">
+		               <gen_Probability>
+		                 <probability value="0.5">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT3}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.5">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT5}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="5">
+		               <gen_Probability>
+		                 <probability value="0.625">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT4}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.375">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT6}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="6">
+		               <gen_Probability>
+		                 <probability value="0.75">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT5}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.25">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT7}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="7">
+		               <gen_Probability>
+		                 <probability value="0.125">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT0}</min>
+			                   <max>${MAXVALUECAT5}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		                 <probability value="0.875">
+		                   <gen_LongNumber>
+			                   <min>${MINVALUECAT8}</min>
+			                   <max>${MAXVALUECAT8}</max>
+		                   </gen_LongNumber>
+		                 </probability>
+		               </gen_Probability>
+		             </case>
+		             <case value="8">
+		               <gen_LongNumber>
+		                 <min>${MINVALUECAT0}</min>
+		                 <max>${MAXVALUECAT7}</max>
+		               </gen_LongNumber>
+		             </case>
+	             </gen_Switch>
+	           </else>
+	         </gen_If>	 
+	       </do>
+       </gen_For>
+     </field>
+     <field name="productID_copy" type="NUMERIC">
+       <gen_OtherFieldValue>
+         <reference field="productID" />
+       </gen_OtherFieldValue>
+     </field>
+     <field name="rating" type="NUMERIC">
+       <gen_For resultsToList="true">
+	       <i>	  
+	         <gen_OtherFieldValue>
+             <reference field="numberOfProducts_tmp" />
+           </gen_OtherFieldValue>
+	       </i>
+	       <do>
+	         <gen_If>
+	           <gen_OtherFieldValue>
+	             <reference field="productisInMainCategory_tmp" />
+             </gen_OtherFieldValue>
+	           <if><![CDATA[((Number) generator[0]).longValue() == 1]]></if>
+	           <then>
+	             <!--<gen_Probability>
+		               <probability value="0.9">
+		               <gen_LongNumber>
+		               <min>4</min>
+		               <max>5</max>
+		               </gen_LongNumber>
+		               </probability>
+		               <probability value="0.1">
+		               <gen_LongNumber>
+		               <min>1</min>
+		               <max>3</max>
+		               </gen_LongNumber>
+		               </probability>
+		               </gen_Probability>-->
+	             <gen_LongNumber>
+		             <min>1</min>
+		             <max>5</max>
+		             <distribution mean="5" name="Normal" sd="1"/>
+	             </gen_LongNumber>
+	           </then>
+	           <else>
+	             <gen_LongNumber>
+		             <min>1</min>
+		             <max>5</max>
+		             <distribution mean="1" name="Normal" sd="1"/>
+	             </gen_LongNumber>
+	           </else>
+	         </gen_If>
+	       </do>
+       </gen_For>
+     </field>
+   </table>
+
+   <table name = "Review">
+     <size>${RATINGSPERCUSTOMER}*${NUMBEROFUSERS}</size>
+     <field name="ReviewID" type="NUMERIC">
+       <gen_Id/>
+     </field>
+     <field name="spam" type="NUMERIC">
+       <gen_Probability>
+	 <probability value="${isSpam}">
+	   <gen_StaticValue>
+	     <value>1</value>
+	   </gen_StaticValue>
+	 </probability>
+	 <probability value="1-${isSpam}">
+	   <gen_StaticValue>
+	     <value>0</value>
+	   </gen_StaticValue>
+	 </probability>
+       </gen_Probability>
+     </field>
+     <field name="text" type="VARCHAR">
+       <gen_If>
+         <gen_OtherFieldValue>
+           <reference field="spam" />
+         </gen_OtherFieldValue>
+         <if><![CDATA[((Number) generator[0]).longValue() == 0]]></if>
+         <then>
+           <gen_Probability>
+             <probability value="0.8">
+               <gen_MarkovChainText>
+	               <file>dicts/tpcxai/markovham.bin</file>
+	               <!-- Number of words per review random between [10,1000] words -->
+                 <min>10</min>
+	               <max>1000</max>
+	             </gen_MarkovChainText>
+             </probability>
+             <probability value="0.2">
+               <gen_MarkovChainText>
+	               <file>dicts/tpcxai/markovspam.bin</file>
+	               <!-- Number of words per review random between [10,1000] words -->
+                 <min>10</min>
+	               <max>1000</max>
+	             </gen_MarkovChainText>
+             </probability>
+           </gen_Probability>
+         </then>
+         <else>
+           <gen_Probability>
+             <probability value="0.2">
+               <gen_MarkovChainText>
+	               <file>dicts/tpcxai/markovham.bin</file>
+	               <!-- Number of words per review random between [10,1000] words -->
+                 <min>10</min>
+	               <max>1000</max>
+	             </gen_MarkovChainText>
+             </probability>
+             <probability value="0.8">
+               <gen_MarkovChainText>
+	               <file>dicts/tpcxai/markovspam.bin</file>
+	               <!-- Number of words per review random between [10,1000] words -->
+                 <min>10</min>
+	               <max>1000</max>
+	             </gen_MarkovChainText>
+             </probability>
+           </gen_Probability>
+         </else>
+       </gen_If>
+     </field>
+   </table>
+
+  <table name="sales_tmp">
+    <size>${NUMBER_STORES}</size>
+    <field name="store" type="NUMERIC">
+      <gen_Id>
+        <min>1</min>
+      </gen_Id>
+    </field>
+
+    <field name="number_peaks_tmp" type="NUMERIC">
+      <gen_LongNumber>
+        <min>0</min>
+        <max>14</max>
+        <distribution mean="4" name="Normal" sd="2" />
+      </gen_LongNumber>
+    </field>
+
+    <field name="peak_dates_tmp" type="NUMERIC">
+      <gen_For resultsToList="true">
+        <i>
+          <gen_OtherFieldValue>
+            <reference field="number_peaks_tmp" />
+          </gen_OtherFieldValue>
+        </i>
+        <do>
+          <gen_LongNumber>
+            <min>1</min>
+            <max>52</max>
+            <distinct>52</distinct>
+          </gen_LongNumber>
+        </do>
+      </gen_For>
+    </field>
+
+    <field name="spread" type="NUMERIC">
+      <gen_DoubleNumber>
+        <minD>1.0</minD>
+        <maxD>1000</maxD>
+        <distribution name="Normal" mean="100" sd="100" />
+      </gen_DoubleNumber>
+    </field>
+  </table>
+
+  <table name="order">
+    <!-- generate approx 10 order trans. per customer per year -->
+    <size>${ORDER_SIZE}</size>
+
+    <field name="o_customer_sk" type="NUMERIC">
+      <gen_ReferenceValue choose="random" from="historical" id="o_customer_picker">
+        <reference table="customer" field="c_customer_sk" />
+      </gen_ReferenceValue>
+    </field>
+
+    <field name="o_order_id" type="NUMERIC">
+      <gen_Id>
+        <min>1</min>
+      </gen_Id>
+    </field>
+
+    <field name="order_size" type="NUMERIC">
+      <gen_LongNumber>
+        <distribution name="Exponential" lambda="0.174" />
+        <min>1</min>
+        <max>200</max>
+      </gen_LongNumber>
+    </field>
+
+    <field name="store" type="NUMERIC">
+      <gen_ReferenceValue choose="random" from="historical" id="store_gen">
+        <reference table="sales_tmp" field="store" />
+      </gen_ReferenceValue>
+    </field>
+
+    <field name="trip_type" type="NUMERIC">
+      <gen_WeightedListItem filename="dicts/tpcxai/trip_type.dict" id="trip_type_picker"
+                            list="triptype" valueColumn="triptype" weightColumn="weighted" />
+    </field>
+
+    <field name="week_of_year" type="DATE">
+      <gen_If>
+        <gen_Probability>
+          <probability value="1 - ${PEAK_PROBABILITY}">
+            <gen_StaticValue>
+              <value>0</value>
+            </gen_StaticValue>
+          </probability>
+          <probability value="${PEAK_PROBABILITY}">
+            <gen_StaticValue>
+              <value>1</value>
+            </gen_StaticValue>
+          </probability>
+        </gen_Probability>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="store" generatorByID="store_gen" />
+          <reference table="sales_tmp" field="number_peaks_tmp" />
+        </gen_ReferenceValue>
+        <if><![CDATA[((Number) generator[1]).longValue() > 0 && ((Number) generator[0]).longValue() == 1]]></if>
+        <!-- is a transaction during a peak week -->
+        <then>
+          <gen_Template>
+            <!-- generator[0] := index in [1, number of peaks) -->
+            <gen_LongNumber>
+              <min>0</min>
+              <max>
+                <gen_Formula>
+                  <gen_ReferenceValue choose="sameChoiceAs" from="">
+                    <sameChoiceAs field="store" generatorByID="store_gen" />
+                    <reference table="sales_tmp" field="number_peaks_tmp" />
+                  </gen_ReferenceValue>
+                  <formula>Math.max(0.0, generator[0] - 1)</formula>
+                </gen_Formula>
+              </max>
+            </gen_LongNumber>
+            <!-- generator[1] := list of the peak weeks -->
+            <gen_ReferenceValue choose="sameChoiceAs" from="">
+              <sameChoiceAs field="store" generatorByID="store_gen" />
+              <reference table="sales_tmp" field="peak_dates_tmp" />
+            </gen_ReferenceValue>
+
+            <getValue>
+              <![CDATA[
+                       int idx = generator[0].getIntValue();
+                       Object[] peaks = ((java.util.Collection) generator[1].getPlainValue()).toArray();
+                       Object value = peaks[idx];
+
+fvdto.setBothValues(value);
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- is an ordenary transaction happing at every week -->
+        <else>
+          <gen_LongNumber>
+            <min>1</min>
+            <max>52</max>
+          </gen_LongNumber>
+        </else>
+      </gen_If>
+    </field>
+    <field name="weekday" type="VARCHAR">
+      <gen_WeightedListItem filename="dicts/tpcxai/weekdays.dict"
+                            list="weekdays" valueColumn="day" weightColumn="businessDays" />   
+    </field>
+    <field name="year" type="NUMERIC">
+      <gen_LongNumber>
+        <min>${START_YEAR}</min>
+        <max>${END_YEAR}</max>
+      </gen_LongNumber>
+    </field>
+    <field name="date" type="DATE">
+      <gen_Template>
+        <gen_OtherFieldValue>
+          <reference field="year" />
+        </gen_OtherFieldValue>
+        <gen_OtherFieldValue>
+          <reference field="week_of_year" />
+        </gen_OtherFieldValue>
+        <gen_OtherFieldValue>
+          <reference field="weekday" />
+        </gen_OtherFieldValue>
+        <getValue>
+          <![CDATA[
+                   int year = generator[0].getIntValue();
+                   long week = generator[1].getLongValue();
+                   String weekday = generator[2].getPlainValue().toString();
+
+int weekday_int = java.time.DayOfWeek.valueOf(weekday.toUpperCase()).getValue();
+
+//String dateStr = String.format("%4d-W%02d-%d", year, week, weekday_int);
+java.text.DecimalFormat df = new java.text.DecimalFormat("00");
+String weekStr = df.format(week);
+
+String dateStr = year + "-W" + weekStr + "-" + weekday_int;
+
+java.time.LocalDate date = java.time.LocalDate.parse(dateStr, java.time.format.DateTimeFormatter.ISO_WEEK_DATE);
+fvdto.setBothValues(date);
+          ]]>
+        </getValue>
+      </gen_Template>
+    </field>
+
+    <field name="trip_type_id" type="NUMERIC">
+      <gen_WeightedListItem filename="dicts/tpcxai/trip_type.dict"
+                            list="triptype" valueColumn="id" weightColumn="weighted">
+        <sameChoiceAs field="trip_type" generatorByID="trip_type_picker" />
+      </gen_WeightedListItem>
+    </field>
+  </table>
+
+  <table name="lineitem">
+    <!-- actual size will be ORDER_SIZE * AVG_NUMBER_ -->
+    <size>${ORDER_SIZE}</size>
+    <field name="li_order_id" type="NUMERIC">
+      <gen_ReferenceValue choose="directRowMapping" from="historical" id="li_order_picker">
+        <reference table="order" field="o_order_id" />
+      </gen_ReferenceValue>
+    </field>
+    <field name="li_product_id" type="NUMERIC">
+      <gen_For>
+        <i>
+          <gen_ReferenceValue choose="sameChoiceAs" from="">
+            <sameChoiceAs field="li_order_id" generatorByID="li_order_picker" />
+            <reference table="order" field="order_size" />
+          </gen_ReferenceValue>
+        </i>
+        <do>
+          <!-- change to pick the product based on the trip_type -->
+          <!-- products are partioned into trip_types -->
+          <gen_ReferenceValue choose="idFromSubGenerator" from="historical">
+            <reference table="product" field="p_product_id" />
+            <gen_LongNumber>
+              <min>
+                <gen_Formula>
+                  <gen_ReferenceValue choose="sameChoiceAs" from="">
+                    <sameChoiceAs field="li_order_id" generatorByID="li_order_picker" />
+                    <reference table="order" field="trip_type_id" />
+                  </gen_ReferenceValue>
+                  <formula>(generator[0] - 1) * (${PRODUCT_SIZE} / ${NUM_TRIP_TYPE})</formula>
+                </gen_Formula>
+              </min>
+              <max>
+                <gen_Formula>
+                  <gen_ReferenceValue choose="sameChoiceAs" from="">
+                    <sameChoiceAs field="li_order_id" generatorByID="li_order_picker" />
+                    <reference table="order" field="trip_type_id" />
+                  </gen_ReferenceValue>
+                  <formula>(generator[0] - 1) * (${PRODUCT_SIZE} / ${NUM_TRIP_TYPE}) + (${PRODUCT_SIZE} / ${NUM_TRIP_TYPE}) - 1</formula>
+                </gen_Formula>
+              </max>
+            </gen_LongNumber>
+          </gen_ReferenceValue>
+        </do>
+      </gen_For>
+    </field>
+
+    <field name="quantity" type="NUMERIC">
+      <gen_For>
+        <i>
+          <gen_ReferenceValue choose="sameChoiceAs" from="">
+            <sameChoiceAs field="li_order_id" generatorByID="li_order_picker" />
+            <reference table="order" field="order_size" />
+          </gen_ReferenceValue>
+        </i>
+        <do>
+          <gen_LongNumber>
+            <min>1</min>
+            <max>10000</max>
+            <distribution name="Normal" mean="${AVG_PRODUCT_QUANTITY}" sd="${AVG_PRODUCT_QUANTITY} / 2" />
+          </gen_LongNumber>
+        </do>
+      </gen_For>
+    </field>
+    <field name="price" type="NUMERIC">
+      <gen_For>
+        <i>
+          <gen_ReferenceValue choose="sameChoiceAs" from="">
+            <sameChoiceAs field="li_order_id" generatorByID="li_order_picker" />
+            <reference table="order" field="order_size" />
+          </gen_ReferenceValue>
+        </i>
+        <do>
+          <gen_DoubleNumber>
+            <minD>0.1</minD>
+            <maxD>10000.0</maxD>
+            <decimalPlaces>2</decimalPlaces>
+            <distribution name="Normal" mean="${AVG_PRODUCT_PRICE}" sd="${AVG_PRODUCT_PRICE} / 2" />
+          </gen_DoubleNumber>
+        </do>
+      </gen_For>
+    </field>
+  </table>
+
+  <table name="store_dept">
+    <size>${NUMBER_STORES} * 68</size>
+    <field name="store" type="NUMERIC">
+      <gen_ReferenceValue choose="relativeRowMapping" from="historical">
+        <reference table="sales_tmp" field="store" />
+      </gen_ReferenceValue>
+    </field>
+    <field name="department" type="VARCHAR">
+      <gen_DictList>
+        <file>dicts/tpcxai/department_list.dict</file>
+        <disableRng>true</disableRng>
+      </gen_DictList>
+    </field>
+    <field name="periods" type="NUMERIC">
+      <gen_StaticValue>
+        <value>52</value>
+      </gen_StaticValue>
+    </field>
+  </table>
+
+  <table name="order_weekly_sales">
+    <size>${NUMBER_STORES} * 68 * 52</size>
+    <field name="store" type="NUMERIC">
+      <!-- <gen_ReferenceValue choose="relativeRowMapping" from="historical" id="store_picker"> -->
+      <!--   <reference table="sales_tmp" field="store" /> -->
+      <!-- </gen_ReferenceValue> -->
+      <gen_Formula>
+        <formula>1 + ((Math.floor(gc.getCurRow() / (52.0 * 68))) % ${NUMBER_STORES})</formula>
+        <decimalPlaces>0</decimalPlaces>
+      </gen_Formula>
+    </field>
+    <field name="department" type="VARCHAR">
+      <gen_DictList>
+        <file>dicts/tpcxai/department_list.dict</file>
+        <disableRng>true</disableRng>
+      </gen_DictList>
+    </field>
+    <field name="week" type="NUMERIC">
+      <gen_Formula>
+        <formula>1 + ((Math.floor(gc.getCurRow() / 68.0)) % 52)</formula>
+        <decimalPlaces>0</decimalPlaces>
+      </gen_Formula>
+    </field>
+    <field name="year" type="DATE">
+      <gen_Formula>
+        <formula>${START_YEAR} + ((Math.floor(gc.getCurRow() / (68.0 * 52 * ${NUMBER_STORES}))))</formula>
+        <decimalPlaces>0</decimalPlaces>
+      </gen_Formula>
+    </field>
+    <field name="date" type="DATE">
+      <gen_Template>
+        <gen_OtherFieldValue>
+          <reference field="year" />
+        </gen_OtherFieldValue>
+        <gen_OtherFieldValue>
+          <reference field="week" />
+        </gen_OtherFieldValue>
+        <getValue>
+          <![CDATA[
+                   int year = generator[0].getIntValue();
+                   long week = generator[1].getLongValue();
+                   int day = 5; // day of week (friday)
+                   String str = "2019-W11-5";
+                   java.text.DecimalFormat df = new java.text.DecimalFormat("00");
+                   String weekStr = df.format(week);
+
+String dateStr = year + "-W" + weekStr + "-" + day;
+java.time.LocalDate date = java.time.LocalDate.parse(dateStr, java.time.format.DateTimeFormatter.ISO_WEEK_DATE);
+fvdto.setBothValues(date);
+          ]]>
+        </getValue>
+      </gen_Template>
+    </field>
+    <field name="weekly_sales" type="NUMERIC">
+      <gen_If>
+        <!-- get list of peak weeks as generator[0] -->
+        <!-- e.g. [8, 12, 42] -->
+        <gen_ReferenceValue choose="idFromSubGenerator" from="historical" id="store_picker">
+          <gen_Formula>
+            <gen_OtherFieldValue>
+              <reference field="store" />
+            </gen_OtherFieldValue>
+            <formula>generator[0] - 1</formula>
+          </gen_Formula>
+          <reference table="sales_tmp" field="peak_dates_tmp" />
+        </gen_ReferenceValue>
+
+        <!-- get current week of year as generator[1] -->
+        <gen_OtherFieldValue>
+          <reference field="week" />
+        </gen_OtherFieldValue>
+        <if unlockFullAccess="true">
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(generator[1])
+          ]]>
+        </if>
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="week" />
+            </gen_OtherFieldValue>
+            <gen_ReferenceValue choose="sameChoiceAs" from="">
+              <sameChoiceAs field="weekly_sales" generatorByID="store_picker" />
+              <reference table="sales_tmp" field="peak_dates_tmp" />
+            </gen_ReferenceValue>
+            <getValue>
+              <![CDATA[
+                       int num_weeks = 1;
+                       double sales = ${PEAK_PROBABILITY} * 1/num_weeks * ${ORDER_SIZE} / (${NUMBER_STORES} * 68) * ${AVG_ORDER_SIZE} * 7 * ${AVG_PRODUCT_PRICE} * ${AVG_PRODUCT_QUANTITY};
+
+fvdto.setBothValues(new Double(sales));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <else>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="week" />
+            </gen_OtherFieldValue>
+            <gen_ReferenceValue choose="sameChoiceAs" from="">
+              <sameChoiceAs field="weekly_sales" generatorByID="store_picker" />
+              <reference table="sales_tmp" field="peak_dates_tmp" />
+            </gen_ReferenceValue>
+            <getValue>
+
+              <![CDATA[
+                       int num_weeks = 1;
+                       double sales = (1 - ${PEAK_PROBABILITY}) * 1/52 * ${ORDER_SIZE} / (${NUMBER_STORES} * 68) * ${AVG_ORDER_SIZE} * 7 * ${AVG_PRODUCT_PRICE} * ${AVG_PRODUCT_QUANTITY};
+
+fvdto.setBothValues(new Double(sales));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </else>
+      </gen_If>
+    </field>
+  </table>
+
+  <table name="product">
+    <size>${PRODUCT_SIZE}</size>
+    <field name="p_product_id" type="NUMERIC">
+      <gen_Id>
+        <min>1</min>
+      </gen_Id>
+    </field>
+    <field name="name" type="VARCHAR">
+      <gen_RandomString>
+        <max>20</max>
+      </gen_RandomString>
+    </field>
+    <field name="trip_type" type="INTEGER">
+      <gen_Switch>
+        <gen_Formula>
+          <formula>1 + (Math.floor(gc.getCurRow() / (${PRODUCT_SIZE} / ${NUM_TRIP_TYPE})) % ${NUM_TRIP_TYPE})</formula>
+        </gen_Formula>
+        <case value="1.0">
+          <gen_StaticValue>
+            <value>3</value>
+          </gen_StaticValue>
+        </case>
+        <case value="2.0">
+          <gen_StaticValue>
+            <value>4</value>
+          </gen_StaticValue>
+        </case>
+        <case value="3.0">
+          <gen_StaticValue>
+            <value>5</value>
+          </gen_StaticValue>
+        </case>
+        <case value="4.0">
+          <gen_StaticValue>
+            <value>6</value>
+          </gen_StaticValue>
+        </case>
+        <case value="5.0">
+          <gen_StaticValue>
+            <value>7</value>
+          </gen_StaticValue>
+        </case>
+        <case value="6.0">
+          <gen_StaticValue>
+            <value>8</value>
+          </gen_StaticValue>
+        </case>
+        <case value="7.0">
+          <gen_StaticValue>
+            <value>9</value>
+          </gen_StaticValue>
+        </case>
+        <case value="8.0">
+          <gen_StaticValue>
+            <value>12</value>
+          </gen_StaticValue>
+        </case>
+        <case value="9.0">
+          <gen_StaticValue>
+            <value>15</value>
+          </gen_StaticValue>
+        </case>
+        <case value="10.0">
+          <gen_StaticValue>
+            <value>18</value>
+          </gen_StaticValue>
+        </case>
+        <case value="11.0">
+          <gen_StaticValue>
+            <value>19</value>
+          </gen_StaticValue>
+        </case>
+        <case value="12.0">
+          <gen_StaticValue>
+            <value>20</value>
+          </gen_StaticValue>
+        </case>
+        <case value="13.0">
+          <gen_StaticValue>
+            <value>21</value>
+          </gen_StaticValue>
+        </case>
+        <case value="14.0">
+          <gen_StaticValue>
+            <value>22</value>
+          </gen_StaticValue>
+        </case>
+        <case value="15.0">
+          <gen_StaticValue>
+            <value>23</value>
+          </gen_StaticValue>
+        </case>
+        <case value="16.0">
+          <gen_StaticValue>
+            <value>24</value>
+          </gen_StaticValue>
+        </case>
+        <case value="17.0">
+          <gen_StaticValue>
+            <value>25</value>
+          </gen_StaticValue>
+        </case>
+        <case value="18.0">
+          <gen_StaticValue>
+            <value>26</value>
+          </gen_StaticValue>
+        </case>
+        <case value="19.0">
+          <gen_StaticValue>
+            <value>27</value>
+          </gen_StaticValue>
+        </case>
+        <case value="20.0">
+          <gen_StaticValue>
+            <value>28</value>
+          </gen_StaticValue>
+        </case>
+        <case value="21.0">
+          <gen_StaticValue>
+            <value>29</value>
+          </gen_StaticValue>
+        </case>
+        <case value="22.0">
+          <gen_StaticValue>
+            <value>30</value>
+          </gen_StaticValue>
+        </case>
+        <case value="23.0">
+          <gen_StaticValue>
+            <value>31</value>
+          </gen_StaticValue>
+        </case>
+        <case value="24.0">
+          <gen_StaticValue>
+            <value>32</value>
+          </gen_StaticValue>
+        </case>
+        <case value="25.0">
+          <gen_StaticValue>
+            <value>33</value>
+          </gen_StaticValue>
+        </case>
+        <case value="26.0">
+          <gen_StaticValue>
+            <value>34</value>
+          </gen_StaticValue>
+        </case>
+        <case value="27.0">
+          <gen_StaticValue>
+            <value>35</value>
+          </gen_StaticValue>
+        </case>
+        <case value="28.0">
+          <gen_StaticValue>
+            <value>36</value>
+          </gen_StaticValue>
+        </case>
+        <case value="29.0">
+          <gen_StaticValue>
+            <value>37</value>
+          </gen_StaticValue>
+        </case>
+        <case value="30.0">
+          <gen_StaticValue>
+            <value>38</value>
+          </gen_StaticValue>
+        </case>
+        <case value="31.0">
+          <gen_StaticValue>
+            <value>39</value>
+          </gen_StaticValue>
+        </case>
+        <case value="32.0">
+          <gen_StaticValue>
+            <value>40</value>
+          </gen_StaticValue>
+        </case>
+        <case value="33.0">
+          <gen_StaticValue>
+            <value>41</value>
+          </gen_StaticValue>
+        </case>
+        <case value="34.0">
+          <gen_StaticValue>
+            <value>41</value>
+          </gen_StaticValue>
+        </case>
+        <case value="35.0">
+          <gen_StaticValue>
+            <value>42</value>
+          </gen_StaticValue>
+        </case>
+        <case value="36.0">
+          <gen_StaticValue>
+            <value>43</value>
+          </gen_StaticValue>
+        </case>
+        <case value="37.0">
+          <gen_StaticValue>
+            <value>44</value>
+          </gen_StaticValue>
+        </case>
+        <case value="38.0">
+          <gen_StaticValue>
+            <value>999</value>
+          </gen_StaticValue>
+        </case>
+        <default>
+          <gen_StaticValue>
+            <value>14</value>
+          </gen_StaticValue>
+        </default>
+      </gen_Switch>
+    </field>
+    <field name="department" type="VARCHAR">
+		  <gen_Switch>
+			  <gen_OtherFieldValue>
+				  <reference field="trip_type" />
+			  </gen_OtherFieldValue>
+        <case value="3">
+          <gen_Probability>
+            <probability value="5369">
+              <gen_StaticValue><value>FINANCIAL SERVICES</value></gen_StaticValue>
+            </probability>
+            <probability value="804">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="76">
+              <gen_StaticValue><value>LARGE HOUSEHOLD GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="59">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="45">
+              <gen_StaticValue><value>PHARMACY OTC</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="4">
+          <gen_Probability>
+            <probability value="563">
+              <gen_StaticValue><value>PHARMACY OTC</value></gen_StaticValue>
+            </probability>
+            <probability value="73">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="47">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="37">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="32">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="5">
+          <gen_Probability>
+            <probability value="5281">
+              <gen_StaticValue><value>PHARMACY OTC</value></gen_StaticValue>
+            </probability>
+            <probability value="2714">
+              <gen_StaticValue><value>PHARMACY RX</value></gen_StaticValue>
+            </probability>
+            <probability value="922">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="614">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="519">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="6">
+          <gen_Probability>
+            <probability value="1000">
+              <gen_StaticValue><value>LIQUOR,WINE,BEER</value></gen_StaticValue>
+            </probability>
+            <probability value="674">
+              <gen_StaticValue><value>CANDY, TOBACCO, COOKIES</value></gen_StaticValue>
+            </probability>
+            <probability value="360">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="227">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="154">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="7">
+          <gen_Probability>
+            <probability value="3669">
+              <gen_StaticValue><value>SERVICE DELI</value></gen_StaticValue>
+            </probability>
+            <probability value="3354">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="3022">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="2278">
+              <gen_StaticValue><value>FROZEN FOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="2097">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="8">
+          <gen_Probability>
+            <probability value="4747">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="2650">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="2488">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="1974">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="1813">
+              <gen_StaticValue><value>DAIRY</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="9">
+          <gen_Probability>
+            <probability value="1383">
+              <gen_StaticValue><value>MENS WEAR</value></gen_StaticValue>
+            </probability>
+            <probability value="1354">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="889">
+              <gen_StaticValue><value>AUTOMOTIVE</value></gen_StaticValue>
+            </probability>
+            <probability value="719">
+              <gen_StaticValue><value>CELEBRATION</value></gen_StaticValue>
+            </probability>
+            <probability value="709">
+              <gen_StaticValue><value>OFFICE SUPPLIES</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="12">
+          <gen_Probability>
+            <probability value="278">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="278">
+              <gen_StaticValue><value>HOUSEHOLD PAPER GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="269">
+              <gen_StaticValue><value>LAWN AND GARDEN</value></gen_StaticValue>
+            </probability>
+            <probability value="231">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="121">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="14">
+          <gen_Probability>
+            <probability value="15">
+              <gen_StaticValue><value>FABRICS AND CRAFTS</value></gen_StaticValue>
+            </probability>
+            <probability value="6">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="3">
+              <gen_StaticValue><value>CELEBRATION</value></gen_StaticValue>
+            </probability>
+            <probability value="3">
+              <gen_StaticValue><value>PETS AND SUPPLIES</value></gen_StaticValue>
+            </probability>
+            <probability value="2">
+              <gen_StaticValue><value>FINANCIAL SERVICES</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="15">
+          <gen_Probability>
+            <probability value="2294">
+              <gen_StaticValue><value>CELEBRATION</value></gen_StaticValue>
+            </probability>
+            <probability value="711">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="498">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="482">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="447">
+              <gen_StaticValue><value>HOUSEHOLD PAPER GOODS</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="18">
+          <gen_Probability>
+            <probability value="1160">
+              <gen_StaticValue><value>TOYS</value></gen_StaticValue>
+            </probability>
+            <probability value="346">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="194">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="181">
+              <gen_StaticValue><value>CELEBRATION</value></gen_StaticValue>
+            </probability>
+            <probability value="103">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="19">
+          <gen_Probability>
+            <probability value="491">
+              <gen_StaticValue><value>ELECTRONICS</value></gen_StaticValue>
+            </probability>
+            <probability value="69">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="48">
+              <gen_StaticValue><value>FINANCIAL SERVICES</value></gen_StaticValue>
+            </probability>
+            <probability value="48">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="45">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="20">
+          <gen_Probability>
+            <probability value="1639">
+              <gen_StaticValue><value>AUTOMOTIVE</value></gen_StaticValue>
+            </probability>
+            <probability value="194">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="140">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="139">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="89">
+              <gen_StaticValue><value>PHARMACY OTC</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="21">
+          <gen_Probability>
+            <probability value="1283">
+              <gen_StaticValue><value>FABRICS AND CRAFTS</value></gen_StaticValue>
+            </probability>
+            <probability value="1257">
+              <gen_StaticValue><value>OFFICE SUPPLIES</value></gen_StaticValue>
+            </probability>
+            <probability value="247">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="137">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="129">
+              <gen_StaticValue><value>CELEBRATION</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="22">
+          <gen_Probability>
+            <probability value="643">
+              <gen_StaticValue><value>ELECTRONICS</value></gen_StaticValue>
+            </probability>
+            <probability value="494">
+              <gen_StaticValue><value>MEDIA AND GAMING</value></gen_StaticValue>
+            </probability>
+            <probability value="201">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="179">
+              <gen_StaticValue><value>1-HR PHOTO</value></gen_StaticValue>
+            </probability>
+            <probability value="175">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="23">
+          <gen_Probability>
+            <probability value="112">
+              <gen_StaticValue><value>PLAYERS AND ELECTRONICS</value></gen_StaticValue>
+            </probability>
+            <probability value="68">
+              <gen_StaticValue><value>MEDIA AND GAMING</value></gen_StaticValue>
+            </probability>
+            <probability value="17">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="16">
+              <gen_StaticValue><value>FINANCIAL SERVICES</value></gen_StaticValue>
+            </probability>
+            <probability value="14">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="24">
+          <gen_Probability>
+            <probability value="2212">
+              <gen_StaticValue><value>COOK AND DINE</value></gen_StaticValue>
+            </probability>
+            <probability value="1950">
+              <gen_StaticValue><value>HOME MANAGEMENT</value></gen_StaticValue>
+            </probability>
+            <probability value="1461">
+              <gen_StaticValue><value>BATH AND SHOWER</value></gen_StaticValue>
+            </probability>
+            <probability value="1206">
+              <gen_StaticValue><value>HOME DECOR</value></gen_StaticValue>
+            </probability>
+            <probability value="1050">
+              <gen_StaticValue><value>BEDDING</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="25">
+          <gen_Probability>
+            <probability value="5381">
+              <gen_StaticValue><value>MENS WEAR</value></gen_StaticValue>
+            </probability>
+            <probability value="3716">
+              <gen_StaticValue><value>LADIESWEAR</value></gen_StaticValue>
+            </probability>
+            <probability value="1836">
+              <gen_StaticValue><value>GIRLS WEAR, 4-6X  AND 7-14</value></gen_StaticValue>
+            </probability>
+            <probability value="1692">
+              <gen_StaticValue><value>BOYS WEAR</value></gen_StaticValue>
+            </probability>
+            <probability value="1529">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="26">
+          <gen_Probability>
+            <probability value="758">
+              <gen_StaticValue><value>HARDWARE</value></gen_StaticValue>
+            </probability>
+            <probability value="369">
+              <gen_StaticValue><value>PAINT AND ACCESSORIES</value></gen_StaticValue>
+            </probability>
+            <probability value="149">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="136">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="122">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="27">
+          <gen_Probability>
+            <probability value="1325">
+              <gen_StaticValue><value>LAWN AND GARDEN</value></gen_StaticValue>
+            </probability>
+            <probability value="1302">
+              <gen_StaticValue><value>HORTICULTURE AND ACCESS</value></gen_StaticValue>
+            </probability>
+            <probability value="203">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="196">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="146">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="28">
+          <gen_Probability>
+            <probability value="1250">
+              <gen_StaticValue><value>SPORTING GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="225">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="142">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="95">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="91">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="29">
+          <gen_Probability>
+            <probability value="480">
+              <gen_StaticValue><value>TOYS</value></gen_StaticValue>
+            </probability>
+            <probability value="410">
+              <gen_StaticValue><value>SPORTING GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="138">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="133">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="108">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="30">
+          <gen_Probability>
+            <probability value="1140">
+              <gen_StaticValue><value>SHOES</value></gen_StaticValue>
+            </probability>
+            <probability value="544">
+              <gen_StaticValue><value>JEWELRY AND SUNGLASSES</value></gen_StaticValue>
+            </probability>
+            <probability value="365">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="314">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="314">
+              <gen_StaticValue><value>MENS WEAR</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="31">
+          <gen_Probability>
+            <probability value="989">
+              <gen_StaticValue><value>WIRELESS</value></gen_StaticValue>
+            </probability>
+            <probability value="121">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="70">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="52">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="51">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="32">
+          <gen_Probability>
+            <probability value="4713">
+              <gen_StaticValue><value>INFANT CONSUMABLE HARDLINES</value></gen_StaticValue>
+            </probability>
+            <probability value="2415">
+              <gen_StaticValue><value>INFANT APPAREL</value></gen_StaticValue>
+            </probability>
+            <probability value="879">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="577">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="572">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="33">
+          <gen_Probability>
+            <probability value="4067">
+              <gen_StaticValue><value>HOUSEHOLD CHEMICALS/SUPP</value></gen_StaticValue>
+            </probability>
+            <probability value="1428">
+              <gen_StaticValue><value>HOUSEHOLD PAPER GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="703">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="559">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="463">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="34">
+          <gen_Probability>
+            <probability value="2657">
+              <gen_StaticValue><value>PETS AND SUPPLIES</value></gen_StaticValue>
+            </probability>
+            <probability value="228">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="192">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="185">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="161">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="35">
+          <gen_Probability>
+            <probability value="6135">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="1757">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="706">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="682">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="437">
+              <gen_StaticValue><value>CANDY, TOBACCO, COOKIES</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="36">
+          <gen_Probability>
+            <probability value="8635">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="3843">
+              <gen_StaticValue><value>BEAUTY</value></gen_StaticValue>
+            </probability>
+            <probability value="1594">
+              <gen_StaticValue><value>PHARMACY OTC</value></gen_StaticValue>
+            </probability>
+            <probability value="1176">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="1003">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="37">
+          <gen_Probability>
+            <probability value="13351">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="5477">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="3667">
+              <gen_StaticValue><value>DAIRY</value></gen_StaticValue>
+            </probability>
+            <probability value="3282">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="2596">
+              <gen_StaticValue><value>MEAT - FRESH &amp; FROZEN</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="38">
+          <gen_Probability>
+            <probability value="7252">
+              <gen_StaticValue><value>DAIRY</value></gen_StaticValue>
+            </probability>
+            <probability value="6417">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="4020">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="2161">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="1662">
+              <gen_StaticValue><value>COMM BREAD</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="39">
+          <gen_Probability>
+            <probability value="12956">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="12602">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="8126">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="6895">
+              <gen_StaticValue><value>DAIRY</value></gen_StaticValue>
+            </probability>
+            <probability value="6490">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="40">
+          <gen_Probability>
+            <probability value="32639">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="22157">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="17354">
+              <gen_StaticValue><value>DAIRY</value></gen_StaticValue>
+            </probability>
+            <probability value="16704">
+              <gen_StaticValue><value>PRODUCE</value></gen_StaticValue>
+            </probability>
+            <probability value="9911">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="41">
+          <gen_Probability>
+            <probability value="340">
+              <gen_StaticValue><value>SHOES</value></gen_StaticValue>
+            </probability>
+            <probability value="328">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="326">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="300">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="270">
+              <gen_StaticValue><value>MENS WEAR</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="42">
+          <gen_Probability>
+            <probability value="1278">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="1137">
+              <gen_StaticValue><value>CELEBRATION</value></gen_StaticValue>
+            </probability>
+            <probability value="860">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="857">
+              <gen_StaticValue><value>MENS WEAR</value></gen_StaticValue>
+            </probability>
+            <probability value="849">
+              <gen_StaticValue><value>INFANT APPAREL</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="43">
+          <gen_Probability>
+            <probability value="523">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="475">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="468">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="314">
+              <gen_StaticValue><value>PHARMACY OTC</value></gen_StaticValue>
+            </probability>
+            <probability value="280">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="44">
+          <gen_Probability>
+            <probability value="1857">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+            <probability value="1341">
+              <gen_StaticValue><value>DSD GROCERY</value></gen_StaticValue>
+            </probability>
+            <probability value="1011">
+              <gen_StaticValue><value>GROCERY DRY GOODS</value></gen_StaticValue>
+            </probability>
+            <probability value="900">
+              <gen_StaticValue><value>HOUSEHOLD CHEMICALS/SUPP</value></gen_StaticValue>
+            </probability>
+            <probability value="889">
+              <gen_StaticValue><value>PHARMACY OTC</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+        <case value="999">
+          <gen_Probability>
+            <probability value="2289">
+              <gen_StaticValue><value>FINANCIAL SERVICES</value></gen_StaticValue>
+            </probability>
+            <probability value="1147">
+              <gen_StaticValue><value>IMPULSE MERCHANDISE</value></gen_StaticValue>
+            </probability>
+            <probability value="860">
+              <gen_StaticValue><value>LADIESWEAR</value></gen_StaticValue>
+            </probability>
+            <probability value="701">
+              <gen_StaticValue><value>MENS WEAR</value></gen_StaticValue>
+            </probability>
+            <probability value="657">
+              <gen_StaticValue><value>PERSONAL CARE</value></gen_StaticValue>
+            </probability>
+          </gen_Probability>
+        </case>
+      </gen_Switch>
+    </field>
+  </table>
+
+  <table name="failures_tmp">
+    <size>${NUMBER_DISKS}</size>
+    <field name="model" type="VARCHAR">
+      <gen_RandomString>
+        <min>5</min>
+        <max>10</max>
+      </gen_RandomString>
+    </field>
+    <field name="serial" type="VARCHAR">
+      <gen_LongNumber>
+        <min>1000000</min>
+        <max>9999999</max>
+      </gen_LongNumber>
+    </field>
+    <field name="num_failure_tmp" type="NUMERIC">
+      <gen_Probability>
+        <!-- NO FAILURE -->
+        <probability value="1 - ${FAILURE_PROB}">
+          <gen_StaticValue>
+            <value>0</value>
+          </gen_StaticValue>
+        </probability>
+
+        <!-- SINGLE FAILURE -->
+        <probability value="${FAILURE_PROB} - (0.0375 * ${FAILURE_PROB})">
+          <gen_LongNumber>
+            <min>1</min>
+            <max>2</max>
+          </gen_LongNumber>
+        </probability>
+
+        <!-- TOTAL FAILURE -->
+        <probability value="${FAILURE_PROB} * 0.0375">
+          <gen_LongNumber>
+            <min>3</min>
+            <max>7</max>
+            <distribution name="Logarithmic" p="0.3"/>
+          </gen_LongNumber>
+        </probability>
+      </gen_Probability>
+    </field>
+    <field name="failed_props_tmp" type="NUMERIC">
+      <gen_For resultsToList="true">
+        <i>
+          <gen_OtherFieldValue>
+            <reference field="num_failure_tmp" />
+          </gen_OtherFieldValue>
+        </i>
+        <do>
+          <gen_LongNumber>
+            <min>1</min>
+            <max>7</max>
+            <distinct>7</distinct>
+          </gen_LongNumber>
+        </do>
+      </gen_For>
+    </field>
+  </table>
+  
+  <table name="failures">
+
+    <size>${NUMBER_DISKS} * ${NUMBER_FAILURE_SAMPLES}</size>
+
+    <field name="random_tmp" type="NUMERIC">
+      <gen_DoubleNumber>
+        <minD>0.0</minD>
+        <maxD>0.2</maxD>
+      </gen_DoubleNumber>
+    </field>
+
+    <field name="index_tmp" type="NUMERIC">
+      <gen_Formula>
+        <gen_Id>
+          <min>0</min>
+        </gen_Id>
+        <formula>
+          (long) (generator[0] / ${NUMBER_DISKS}) % ${NUMBER_FAILURE_SAMPLES}
+        </formula>
+      </gen_Formula>
+    </field>
+    <!-- END TEMPORARY FIELDS -->
+
+    <field name="date" type="DATE">
+      <gen_FormatNumberAsDate>
+        <outputFormat>yyyy-MM-dd</outputFormat>
+        <gen_Template>
+          <gen_OtherFieldValue>
+            <reference field="index_tmp" />
+          </gen_OtherFieldValue>
+          <getValue>
+            <![CDATA[
+                     long curIndex = generator[0].getIntValue();
+                     long day = curIndex * 1000 * 60 * 60 * 24;
+                     fvdto.setBothValues(new Long(day));
+            ]]>
+          </getValue>
+        </gen_Template>
+      </gen_FormatNumberAsDate>
+    </field>
+
+    <field name="serial_number" type="VARCHAR">
+      <gen_ReferenceValue choose="idFromSubGenerator" from="historical" id="serial_chooser">
+        <gen_Formula>
+          <gen_Id>
+            <min>0</min>
+          </gen_Id>
+          <formula>
+            generator[0] % ${NUMBER_DISKS}
+          </formula>
+        </gen_Formula>
+        <reference table="failures_tmp" field="serial" />
+      </gen_ReferenceValue>
+    </field>
+
+    <field name="model" type="VARCHAR">
+      <gen_ReferenceValue choose="sameChoiceAs" from="">
+        <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+        <reference table="failures_tmp" field="model" />
+      </gen_ReferenceValue>
+    </field>
+
+    <field name="failure" type="NUMERIC">
+      <gen_Template>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="num_failure_tmp" />
+        </gen_ReferenceValue>
+        <gen_OtherFieldValue>
+          <reference field="index_tmp" />
+        </gen_OtherFieldValue>
+        <getValue>
+          <![CDATA[
+                   long curIndex = generator[1].getLongValue();
+                   long willFail = generator[0].getLongValue();
+                   long n = (long) ${NUMBER_FAILURE_SAMPLES};
+                   long failure = ((willFail > 0.0) && (curIndex >= (n - 1))) ? 1 : 0;
+                   fvdto.setBothValues(new Long(failure));
+          ]]>
+        </getValue>
+      </gen_Template>
+    </field>
+    <!-- PROPERTIES (FEATURES) -->
+    <field name="smart_5_raw" type="NUMERIC">
+      <gen_If>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="failed_props_tmp" />
+        </gen_ReferenceValue>
+        <if>
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(new Integer(1))
+          ]]>
+        </if>
+        <!-- generate failing values -->
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="random_tmp" />
+            </gen_OtherFieldValue>
+            <gen_StaticValue>
+              <value>1</value>
+            </gen_StaticValue>
+            <gen_OtherFieldValue>
+              <reference field="index_tmp" />
+            </gen_OtherFieldValue>
+            <getValue>
+              <![CDATA[
+                       double curIndex = generator[2].getDoubleValue();
+                       double x = generator[0].getDoubleValue();
+                       double scale = generator[1].getDoubleValue();
+                       double n = ${NUMBER_FAILURE_SAMPLES};
+                       double res = (curIndex / n + x) * scale;
+                       fvdto.setBothValues(new Double(res));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- generate normal values -->
+        <else>
+          <gen_DoubleNumber>
+            <minD>0.0</minD>
+            <maxD>0.5</maxD>
+          </gen_DoubleNumber>
+        </else>
+      </gen_If>
+    </field>
+    <field name="smart_10_raw" type="NUMERIC">
+      <gen_If>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="failed_props_tmp" />
+        </gen_ReferenceValue>
+        <if>
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(new Integer(2))
+          ]]>
+        </if>
+        <!-- generate failing values -->
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="random_tmp" />
+            </gen_OtherFieldValue>
+            <gen_StaticValue>
+              <value>3</value>
+            </gen_StaticValue>
+            <gen_OtherFieldValue>
+              <reference field="index_tmp" />
+            </gen_OtherFieldValue>
+            <getValue>
+              <![CDATA[
+                       double curIndex = generator[2].getDoubleValue();
+                       double x = generator[0].getDoubleValue();
+                       double scale = generator[1].getDoubleValue();
+                       double n = ${NUMBER_FAILURE_SAMPLES};
+                       double res = ((Math.pow(curIndex, 2.0d) / Math.pow(n, 2.0d)) + x) * scale;
+                       fvdto.setBothValues(new Double(res));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- generate normal values -->
+        <else>
+          <gen_DoubleNumber>
+            <minD>0</minD>
+            <maxD>2</maxD>
+          </gen_DoubleNumber>
+        </else>
+      </gen_If>
+    </field>
+    <field name="smart_184_raw" type="NUMERIC">
+      <gen_If>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="failed_props_tmp" />
+        </gen_ReferenceValue>
+        <if>
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(new Integer(3))
+          ]]>
+        </if>
+        <!-- generate failing values -->
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="random_tmp" />
+            </gen_OtherFieldValue>
+            <gen_StaticValue>
+              <value>100</value>
+            </gen_StaticValue>
+            <gen_OtherFieldValue>
+              <reference field="index_tmp" />
+            </gen_OtherFieldValue>
+            <getValue>
+              <![CDATA[
+                       double curIndex = generator[2].getDoubleValue();
+                       double x = generator[0].getDoubleValue();
+                       double scale = generator[1].getDoubleValue();
+                       double n = ${NUMBER_FAILURE_SAMPLES};
+                       double res = (curIndex / n + x) * scale;
+                       fvdto.setBothValues(new Double(res));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- generate normal values -->
+        <else>
+          <gen_DoubleNumber>
+            <minD>0</minD>
+            <maxD>1</maxD>
+          </gen_DoubleNumber>
+        </else>
+      </gen_If>
+    </field>
+    <field name="smart_187_raw" type="NUMERIC">
+      <gen_If>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="failed_props_tmp" />
+        </gen_ReferenceValue>
+        <if>
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(new Integer(4))
+          ]]>
+        </if>
+        <!-- generate failing values -->
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="random_tmp" />
+            </gen_OtherFieldValue>
+            <gen_StaticValue>
+              <value>40</value>
+            </gen_StaticValue>
+            <gen_OtherFieldValue>
+              <reference field="index_tmp" />
+            </gen_OtherFieldValue>
+            <getValue>
+              <![CDATA[
+                       double curIndex = generator[2].getDoubleValue();
+                       double x = generator[0].getDoubleValue();
+                       double scale = generator[1].getDoubleValue();
+                       double n = ${NUMBER_FAILURE_SAMPLES};
+                       double res = (curIndex / n + x) * scale;
+                       fvdto.setBothValues(new Double(res));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- generate normal values -->
+        <else>
+          <gen_DoubleNumber>
+            <minD>0</minD>
+            <maxD>1</maxD>
+          </gen_DoubleNumber>
+        </else>
+      </gen_If>
+    </field>
+    <field name="smart_188_raw" type="NUMERIC">
+      <gen_If>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="failed_props_tmp" />
+        </gen_ReferenceValue>
+        <if>
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(new Integer(5))
+          ]]>
+        </if>
+        <!-- generate failing values -->
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="random_tmp" />
+            </gen_OtherFieldValue>
+            <gen_StaticValue>
+              <value>10</value>
+            </gen_StaticValue>
+            <gen_OtherFieldValue>
+              <reference field="index_tmp" />
+            </gen_OtherFieldValue>
+            <getValue>
+              <![CDATA[
+                       double curIndex = generator[2].getDoubleValue();
+                       double x = generator[0].getDoubleValue();
+                       double scale = generator[1].getDoubleValue();
+                       double n = ${NUMBER_FAILURE_SAMPLES};
+                       double res = ((Math.pow(curIndex, 2.0d) / Math.pow(n, 2.0d)) + x) * scale;
+                       fvdto.setBothValues(new Double(res));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- generate normal values -->
+        <else>
+          <gen_DoubleNumber>
+            <minD>0</minD>
+            <maxD>1</maxD>
+          </gen_DoubleNumber>
+        </else>
+      </gen_If>
+    </field>
+    <field name="smart_197_raw" type="NUMERIC">
+      <gen_If>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="failed_props_tmp" />
+        </gen_ReferenceValue>
+        <if>
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(new Integer(6))
+          ]]>
+        </if>
+        <!-- generate failing values -->
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="random_tmp" />
+            </gen_OtherFieldValue>
+            <gen_StaticValue>
+              <value>10000</value>
+            </gen_StaticValue>
+            <gen_OtherFieldValue>
+              <reference field="index_tmp" />
+            </gen_OtherFieldValue>
+            <getValue>
+              <![CDATA[
+                       double curIndex = generator[2].getDoubleValue();
+                       double x = generator[0].getDoubleValue();
+                       double scale = generator[1].getDoubleValue();
+                       double n = ${NUMBER_FAILURE_SAMPLES};
+                       double res = ((Math.pow(curIndex, 2.0d) / Math.pow(n, 2.0d)) + x) * scale;
+                       fvdto.setBothValues(new Double(res));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- generate normal values -->
+        <else>
+          <gen_DoubleNumber>
+            <minD>0</minD>
+            <maxD>10</maxD>
+          </gen_DoubleNumber>
+        </else>
+      </gen_If>
+    </field>
+    <field name="smart_198_raw" type="NUMERIC">
+      <gen_If>
+        <gen_ReferenceValue choose="sameChoiceAs" from="">
+          <sameChoiceAs field="serial_number" generatorByID="serial_chooser" />
+          <reference table="failures_tmp" field="failed_props_tmp" />
+        </gen_ReferenceValue>
+        <if>
+          <![CDATA[
+                   ((java.util.Collection) generator[0]).contains(new Integer(7))
+          ]]>
+        </if>
+        <!-- generate failing values -->
+        <then>
+          <gen_Template>
+            <gen_OtherFieldValue>
+              <reference field="random_tmp" />
+            </gen_OtherFieldValue>
+            <gen_StaticValue>
+              <value>5</value>
+            </gen_StaticValue>
+            <gen_OtherFieldValue>
+              <reference field="index_tmp" />
+            </gen_OtherFieldValue>
+            <getValue>
+              <![CDATA[
+                       double curIndex = generator[2].getDoubleValue();
+                       double x = generator[0].getDoubleValue();
+                       double scale = generator[1].getDoubleValue();
+                       double n = ${NUMBER_FAILURE_SAMPLES};
+                       double res = (curIndex / n + x) * scale;
+                       fvdto.setBothValues(new Double(res));
+              ]]>
+            </getValue>
+          </gen_Template>
+        </then>
+        <!-- generate normal values -->
+        <else>
+          <gen_DoubleNumber>
+            <minD>0</minD>
+            <maxD>1</maxD>
+          </gen_DoubleNumber>
+        </else>
+      </gen_If>
+    </field>
+  </table>
+  
+</schema>

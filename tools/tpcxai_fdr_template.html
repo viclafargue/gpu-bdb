@@ -1,0 +1,261 @@
+<!--
+-- Copyright (C) 2021 Transaction Processing Performance Council (TPC) and/or its contributors.
+-- This file is part of a software package distributed by the TPC
+-- The contents of this file have been developed by the TPC, and/or have been licensed to the TPC under one or more contributor
+-- license agreements.
+-- This file is subject to the terms and conditions outlined in the End-User
+-- License Agreement (EULA) which can be found in this distribution (EULA.txt) and is available at the following URL:
+-- http://www.tpc.org/TPC_Documents_Current_Versions/txt/EULA.txt
+-- Unless required by applicable law or agreed to in writing, this software is distributed on an "AS IS" BASIS, WITHOUT
+-- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied, and the user bears the entire risk as to quality
+-- and performance as well as the entire cost of service or repair in case of defect. See the EULA for more details.
+-->
+
+
+<!--
+-- Copyright 2021 Intel Corporation.
+-- This software and the related documents are Intel copyrighted materials, and your use of them 
+-- is governed by the express license under which they were provided to you ("License"). Unless the 
+-- License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or 
+-- transmit this software or the related documents without Intel's prior written permission.
+-- 
+-- This software and the related documents are provided as is, with no express or implied warranties, 
+-- other than those that are expressly stated in the License.
+-- 
+-->
+
+
+<html lang="en">
+<head>
+    <title>TPCx-AI Benchmark Run Report</title>
+    <style type="text/css">
+        #content {
+            margin: 0 5%;
+        }
+        .tablestyle {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .tablestyle td, .tablestyle th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .tablestyle td[data-value="nan"] {
+            color: transparent;
+            font-size: 0px;
+        }
+
+        .tablestyle tr:nth-child(even){
+            background-color: #f2f2f2;}
+
+        .tablestyle tr:hover {
+            background-color: #ddd;
+        }
+
+        .tablestyle th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .tablestyle tfoot {
+            font-weight: bold;
+            background-color: #9a9a9a;
+            color: #f2f2f2;
+        }
+
+        .tablestyle .highlight {
+            /*background-color: #9a9a9a;*/
+            /*color: #f2f2f2;*/
+            font-weight: bold;
+        }
+
+        .tablestyle .total {
+            text-align: right;
+        }
+    </style>
+    <script type="text/javascript">
+        function pad_number(number, length) {
+            let num_string = number.toString()
+            let diff = length - num_string.length
+            let prefix = ''
+            if (diff > 0) {
+                prefix = '0'.repeat(diff)
+            }
+            return `${prefix}${num_string}`
+        }
+
+        function timestamp_to_localtime(timestamp_html) {
+            const timestamp = timestamp_html.match("(\[0-9]+\.[0-9]+)")[0]
+            const ts = timestamp * 1000
+            if (ts !== 0.0) {
+                const d = new Date(ts)
+                // return datetime in iso format: 2021-04-15T08:01:11.147Z
+                //return new Date(ts).toISOString()
+
+                // get the datetime components
+                // pad the components with 0 if necessary
+                let year = pad_number(d.getFullYear(), 2)
+                let month = pad_number(d.getMonth() + 1, 2)
+                let date = pad_number(d.getDate(), 2)
+                let hours = pad_number(d.getHours(), 2)
+                let minutes = pad_number(d.getMinutes(), 2)
+                let seconds = pad_number(d.getSeconds(), 2)
+                let millis = pad_number(d.getMilliseconds(), 3)
+
+                return `${year}-${month}-${date} ${hours}:${minutes}:${seconds}.${millis}`
+            } else {
+                return "N/A"
+            }
+        }
+
+        window.onload = function () {
+            const timestamps = document.getElementsByClassName("timestamp");
+            for (let i=0; i < timestamps.length; i++) {
+                const ts = timestamps[i].innerHTML;
+                timestamps[i].innerHTML = timestamp_to_localtime(ts);
+            }
+        }
+    </script>
+</head>
+<body>
+<div id="content">
+    <div>
+        <h1>TPCx-AI Benchmark Run Report</h1>
+    </div>
+
+    <div>
+        <h2>Benchmark Meta Data</h2>
+        <ul>
+            <li>benchmark ID: {{benchmark_id}}</li>
+            <li>benchmark start: <span class="timestamp">{{start}}</span></li>
+            <li>benchmark end: <span class="timestamp">{{end}}</span></li>
+            <li>benchmark duration: {{duration}}</li>
+            <li>benchmark name: {{benchmark_name}}</li>
+            <li>cmd args: {{cmd_args}}</li>
+        </ul>
+    </div>
+
+    <div>
+        <h2>TPCx-AI Metric</h2>
+        <table class="tablestyle">
+            <thead>
+            <tr>
+                <th>Metric Name</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            {% for m in metric %}
+            <tbody>
+            <tr>
+                <td>{{m.metric_name}}</td>
+                <td>{{m.metric_value}}</td>
+            </tr>
+            </tbody>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div>
+        <h2>Phases</h2>
+        {% for phase in phases %}
+        <div>
+        <h3>{{phase.phase_name_formatted}}</h3>
+        <table class="tablestyle">
+            <thead>
+            <tr>
+                <th>Stream</th>
+                <th>Use Case</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Runtime</th>
+                <th>Successful</th>
+                <th>Comment</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            {% for uc in phase.use_cases %}
+            <tr>
+                <td>{{uc.stream}}</td>
+                <td>{{uc.use_case}}</td>
+                <td class="timestamp">{{uc.start_time}}</td>
+                <td class="timestamp">{{uc.end_time}}</td>
+                <td>{{uc.runtime}}</td>
+                <td>{{uc.successful}}</td>
+                {% if phase.phase == 'Phase.SCORING' %}
+                <td>{{uc.metric_name}}: {{uc.metric_value}}</td>
+                {% elif phase.phase in ['Phase.VERIFICATION', 'Phase.CLEAN', 'Phase.LOADING'] %}
+                <td>{{uc.command}}</td>
+                {% else %}
+                <td></td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr>
+                <td class="pretotal"></td>
+                <td colspan="1" class="total">Total</td>
+                <td class="timestamp">{{phase.start_time}}</td>
+                <td class="timestamp">{{phase.end_time}}</td>
+                <td>{{phase.runtime}}</td>
+                <td>{{phase.successful}}</td>
+                <td>complete phase</td>
+            </tr>
+            </tfoot>
+        </table>
+        </div>
+        {% endfor %}
+
+    <div>
+        <h2>Use Cases</h2>
+
+        <table class="tablestyle">
+            <thead>
+            <tr>
+                {% for key in use_cases[0].keys() %}
+                <th>{{key}}</th>
+                {% endfor %}
+            </tr>
+            </thead>
+            <tbody>
+            {% for uc in use_cases %}
+            <tr>
+                {% for value in uc.values() %}
+                <td data-value="{{value}}">{{value}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <h2>Graphs</h2>
+        <h3>Phases</h3>
+        <figure>
+            <img src="data:image/svg+xml;base64,{{use_cases_stacked}}"  alt="" width="100%"/>
+        </figure>
+
+        <h4>Training</h4>
+        <figure>
+            <img src="data:image/svg+xml;base64,{{training_bar}}"  alt="" width="100%"/>
+        </figure>
+        <h4>Serving</h4>
+        <figure>
+            <img src="data:image/svg+xml;base64,{{serving_bar_grouped}}"  alt="" width="100%"/>
+        </figure>
+        <h4>Serving Throughput</h4>
+        <figure>
+            <img src="data:image/svg+xml;base64,{{serving_throughput_error}}"  alt="" width="100%"/>
+        </figure>
+    </div>
+</div>
+</body>
+</html>

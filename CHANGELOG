@@ -1,0 +1,11 @@
+v1.0.2
+- Adds the CHECK_INTEGRITY phase to the benchmark run script.
+- VERIFICATION phase is integrated in the SCORING phase
+- Enables use of Horovod 0.20+ on Use Case 9
+- Reports number of files changed but allows the benchmark run to continue
+- Removes dependency on pycryptodome
+- Sets output directory for redundancy report to the logs/ directory
+
+v1.0.1
+- Upgrades PDGF to a newer version
+- Creates two virtual environments for python execution

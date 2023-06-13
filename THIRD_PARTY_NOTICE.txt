@@ -1,0 +1,571 @@
+------------------------------------------------------
+
+ADDITIONAL 3RD PARTY LICENSES ARE AT the following directories.  See the text below for more details on what these cover.
+   lib/pdgf/LICENSE.txt
+   THIRD_PARTY_LICENSE.txt
+
+------------------------------------------------------
+/ Included in distribution package:
+This kit contains a restricted version of the Parallel Data Generation Framework (PDGF), which is used to generate some of the benchmark data set. PDGF is a product of bankmark UG (haftungsbeschraenkt). License terms for PDGF can be found in the lib/pdgf directory. See
+   lib/pdgf/LICENSE.txt
+   lib/pdgf/THIRD-PARTY-LICENSE.txt
+   lib/pdgf/*
+
+The following class was written by the developers of this project despite the Spark namespace(org.apache.spark.ml.evaluation) used for the package.
+   workload/spark/src/main/scala/org/apache/spark/ml/evaluation/MulticlassLogarithmicLossEvaluator.scala
+
+The following projects or part of them are restributed with this benchmark:
+
+THIRDPARTY COMPONENT                                                         LICENSE
+//-----------------------------------------------------------------------------------------------------------------------
+BankmarkUG (haftungsbeschraenkt) PDGF for TPC-AI                            BankmarkUG PDGF Software License Agreement (See lib/pdgf/LICENSE.txt)
+DMLC_XGBoost (XGBoost4J/XGBoost4J-Spark) (lib/xgboost-*.jar)                Apache License 2.0
+scallop (lib/scallop-*.jar)                                                 MIT License
+sryza spark-timeseries (lib/sparkts-*.jar)                                  Apache License 2.0
+Openface (Snippeti+File: UseCase09.py, align.py, model.py)                  Apache License 2.0
+Davisking/dlib-models (File: shape_predictor_5_face_landmarks.dat)          CC0 1.0
+Keras-OpenFace (Snippet+File: UseCase09.py, nn4.small2.v1.h5)               Apache License 2.0
+Hetland levenshtein.py (Snippet: tpcxai-driver/metrics.py)                  CC0 1.0
+python-benedict                                                             MIT License
+
+// Not included in distribution package:
+At compile and runtime, this kit requires several projects that provide API import or name bindings.
+These projects are not restributed with this benchmark and their licenses include: Apache 2.0, GNU LGPL, ISC, MIT, BSD 3-clause New or Revised, and Python Software Foundation 2.3 licenses.
+In an effort towards completeness we provide the list of components and their licenses below:
+
+
+THIRDPARTY COMPONENT                                LICENSE
+//--------------------------------------------------------------------------------------------
+Apache Commons Math                                                                     Apache License 2.0
+Apache Log4j                                                                            Apache License 2.0
+Apache Spark                                                                            Apache License 2.0
+Apache Hadoop                                                                           Apache License 2.0
+DMLC XGBoost                                                                            Apache License 2.0
+Scipy (NicolasHug) Surprise                                                             BSD 3-clause "New" or "Revised" License
+ScalaTest                                                                               Apache License 2.0
+numpy                                                                                   BSD 3-clause "New" or "Revised" License
+pandas                                                                                  BSD 3-clause "New" or "Revised" License
+python-virtualenv                                                                       MIT License
+pyyaml                                                                                  MIT License
+scikit learn contrib imbalanced learn                                                   MIT License
+scikit-learn                                                                            BSD 3-clause "New" or "Revised" License
+scipy                                                                                   BSD 3-clause "New" or "Revised" License
+setuptools                                                                              Python Software Foundation License 2.3
+tqdm                                                                                    MIT License
+scalismo faces                                                                          Apache License 2.0
+scalismo                                                                                Apache License 2.0
+Petastorm                                                                               Apache License 2.0
+statsmodels                                                                             BSD 3-clause "New" or "Revised" License
+python/typing                                                                           Python License 2.0
+OpenCV Python                                                                           MIT License
+keras                                                                                   Apache License 2.0
+keras-preprocessing                                                                     MIT License
+keras-applications                                                                      MIT License
+joblib                                                                                  BSD 3-clause "New" or "Revised" License
+horovod                                                                                 Apache License 2.0
+Davisking/dlib-models                                                                   CC0 1.0
+OpenFace                                                                                Apache License 2.0
+Apache-arrow                                                                            Apache License 2.0
+Librosa                                                                                 ISC License
+Anaconda                                                                                BSD 3-clause License
+Libsndfile                                                                              GNU LGPL
+Tensorflow                                                                              Apache License 2.0
+Tensorflow-addons                                                                       Apache License 2.0
+pypi h5py                                                                               BSD 3-clause "New" or "Revised" License
+Matplotlib                                                                              MATPLOTLIB License 1.3.0 or Later
+Joblib                                                                                  BSD 3-clause "New" or "Revised" License
+Jinja                                                                                   BSD 3-clause "New" or "Revised" License
+Keras-Openface                                                                          Apache License 2.0
+
+
+//--------------------------------------------------------------------------------------------//
+
+//--------------------------------------------------------------------------------------------//
+
+
+//--------------------------------------------------------------------------------------------//
+
+//*** Keras Openface Notice ***//
+//------------------------------------------------------------------------------//
+The Initial Developer of some parts of the project, which are copied from, derived from, or
+inspired by OpenFace, is Carnegie Mellon University.
+Copyright 2015-2020 Carnegie Mellon University
+
+The Initial Developer of some parts of the project, which are copied from, derived from, or
+inspired by davidsandberg/facenet (https://github.com/davidsandberg/facenet), is David Sandberg.
+Copyright 2016 David Sandberg
+
+
+/*** python-benedict ***//
+//-------------------------------------------------------------------------------------------//
+MIT License
+
+Copyright (c) 2019-present Fabio Caccamo
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+
+//*** Petastorm NOTICE ***//
+//------------------------------------------------------------------------------//
+Petastorm includes derived work from CPython(https://github.com/python/cpython/blob/3.6/Lib/collections/__init__.py). The derived work includes:
+
+* changes to support more than 255 fields
+** change the __new__ method implementation
+** add a __reduce__ method to make it pickable
+
+* changes to match the pylint 2.7 checker
+** add of warning ``#pylint: disable=W0122`` for the class_definition exec() call
+** adapt the verbose print() call
+
+CPython is under the Python License 2.0.
+
+
+//*** Horovod NOTICE ***//
+//------------------------------------------------------------------------------//
+   Horovod includes derived work from the following:
+
+   FlatBuffers
+   Copyright (c) 2014 Google Inc.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   baidu-research/tensorflow-allreduce
+   Copyright (c) 2015, The TensorFlow Authors.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   NVIDIA/cutlass
+   Copyright (c) 2017, NVIDIA CORPORATION.  All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+      *  Redistributions of source code must retain the above copyright
+         notice, this list of conditions and the following disclaimer.
+      *  Redistributions in binary form must reproduce the above copyright
+         notice, this list of conditions and the following disclaimer in the
+         documentation and/or other materials provided with the distribution.
+      *  Neither the name of the NVIDIA CORPORATION nor the
+         names of its contributors may be used to endorse or promote products
+         derived from this software without specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+   ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL NVIDIA CORPORATION BE LIABLE FOR ANY
+   DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+   LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+   ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+   scikit-learn
+   Copyright (c) 2007–2018 The scikit-learn developers. All rights reserved.
+
+   Licensed under the New BSD License:
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+     a. Redistributions of source code must retain the above copyright notice,
+        this list of conditions and the following disclaimer.
+     b. Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+     c. Neither the name of the Scikit-learn Developers  nor the names of
+        its contributors may be used to endorse or promote products
+        derived from this software without specific prior written
+        permission.
+
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE FOR
+   ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+   LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+   OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+   DAMAGE.
+
+   The derived work can be found in the files:
+
+        - horovod/common/optim/gaussian_process.h
+        - horovod/common/optim/gaussian_process.cc
+
+   krasserm/bayesian-machine-learning (http://krasserm.github.io)
+   Copyright 2018 Martin Krasser. All Rights Reserved.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   The derived work can be found in the files:
+
+        - horovod/common/optim/bayesian_optimization.h
+        - horovod/common/optim/bayesian_optimization.cc
+        - horovod/common/optim/gaussian_process.h
+        - horovod/common/optim/gaussian_process.cc
+
+   fastai/fastai
+   Copyright 2017 onwards, fast.ai, Inc.
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+   The derived work can be found in the files:
+
+        - examples/spark/keras/keras_spark_rossmann_run.py
+
+   elnormous/HTTPRequest
+   Copyright (c) 2017, Elviss Strazdiņš
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   * Redistributions of source code must retain the above copyright notice, this
+     list of conditions and the following disclaimer.
+
+   * Redistributions in binary form must reproduce the above copyright notice,
+     this list of conditions and the following disclaimer in the documentation
+     and/or other materials provided with the distribution.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+   DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+   FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+   CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+   OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+   pytorch
+   From PyTorch:
+
+   Copyright (c) 2016-     Facebook, Inc            (Adam Paszke)
+   Copyright (c) 2014-     Facebook, Inc            (Soumith Chintala)
+   Copyright (c) 2011-2014 Idiap Research Institute (Ronan Collobert)
+   Copyright (c) 2012-2014 Deepmind Technologies    (Koray Kavukcuoglu)
+   Copyright (c) 2011-2012 NEC Laboratories America (Koray Kavukcuoglu)
+   Copyright (c) 2011-2013 NYU                      (Clement Farabet)
+   Copyright (c) 2006-2010 NEC Laboratories America (Ronan Collobert, Leon Bottou, Iain Melvin, Jason Weston)
+   Copyright (c) 2006      Idiap Research Institute (Samy Bengio)
+   Copyright (c) 2001-2004 Idiap Research Institute (Ronan Collobert, Samy Bengio, Johnny Mariethoz)
+
+   From Caffe2:
+
+   Copyright (c) 2016-present, Facebook Inc. All rights reserved.
+
+   All contributions by Facebook:
+   Copyright (c) 2016 Facebook Inc.
+
+   All contributions by Google:
+   Copyright (c) 2015 Google Inc.
+   All rights reserved.
+
+   All contributions by Yangqing Jia:
+   Copyright (c) 2015 Yangqing Jia
+   All rights reserved.
+
+   All contributions from Caffe:
+   Copyright(c) 2013, 2014, 2015, the respective contributors
+   All rights reserved.
+
+   All other contributions:
+   Copyright(c) 2015, 2016 the respective contributors
+   All rights reserved.
+
+   Caffe2 uses a copyright model similar to Caffe: each contributor holds
+   copyright over their contributions to Caffe2. The project versioning records
+   all such contribution and copyright details. If a contributor wants to further
+   mark their specific copyright on a particular contribution, they should
+   indicate their copyright solely in the commit message of the change when it is
+   committed.
+
+   All rights reserved.
+
+   Redistribution and use in source and binary forms, with or without
+   modification, are permitted provided that the following conditions are met:
+
+   1. Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+   3. Neither the names of Facebook, Deepmind Technologies, NYU, NEC Laboratories America
+      and IDIAP Research Institute nor the names of its contributors may be
+      used to endorse or promote products derived from this software without
+      specific prior written permission.
+
+   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+   POSSIBILITY OF SUCH DAMAGE.
+
+   The derived work can be found in the files:
+
+        - horovod/torch/sync_batch_norm.py
+
+
+//*** Apache Arrow Notice ***//
+Apache Arrow
+Copyright 2016-2019 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+This product includes software from the SFrame project (BSD, 3-clause).
+* Copyright (C) 2015 Dato, Inc.
+* Copyright (c) 2009 Carnegie Mellon University.
+
+This product includes software from the Feather project (Apache 2.0)
+https://github.com/wesm/feather
+
+This product includes software from the DyND project (BSD 2-clause)
+https://github.com/libdynd
+
+This product includes software from the LLVM project
+ * distributed under the University of Illinois Open Source
+
+This product includes software from the google-lint project
+ * Copyright (c) 2009 Google Inc. All rights reserved.
+
+This product includes software from the mman-win32 project
+ * Copyright https://code.google.com/p/mman-win32/
+ * Licensed under the MIT License;
+
+This product includes software from the LevelDB project
+ * Copyright (c) 2011 The LevelDB Authors. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be
+ * Moved from Kudu http://github.com/cloudera/kudu
+
+This product includes software from the CMake project
+ * Copyright 2001-2009 Kitware, Inc.
+ * Copyright 2012-2014 Continuum Analytics, Inc.
+ * All rights reserved.
+
+This product includes software from https://github.com/matthew-brett/multibuild (BSD 2-clause)
+ * Copyright (c) 2013-2016, Matt Terry and Matthew Brett; all rights reserved.
+
+This product includes software from the Ibis project (Apache 2.0)
+ * Copyright (c) 2015 Cloudera, Inc.
+ * https://github.com/cloudera/ibis
+
+This product includes software from Dremio (Apache 2.0)
+  * Copyright (C) 2017-2018 Dremio Corporation
+  * https://github.com/dremio/dremio-oss
+
+This product includes software from Google Guava (Apache 2.0)
+  * Copyright (C) 2007 The Guava Authors
+  * https://github.com/google/guava
+
+This product include software from CMake (BSD 3-Clause)
+  * CMake - Cross Platform Makefile Generator
+  * Copyright 2000-2019 Kitware, Inc. and Contributors
+
+The web site includes files generated by Jekyll.
+
+--------------------------------------------------------------------------------
+
+This product includes code from Apache Kudu, which includes the following in
+its NOTICE file:
+
+  Apache Kudu
+  Copyright 2016 The Apache Software Foundation
+
+  This product includes software developed at
+  The Apache Software Foundation (http://www.apache.org/).
+
+  Portions of this software were developed at
+  Cloudera, Inc (http://www.cloudera.com/).
+
+--------------------------------------------------------------------------------
+
+This product includes code from Apache ORC, which includes the following in
+its NOTICE file:
+
+  Apache ORC
+  Copyright 2013-2019 The Apache Software Foundation
+
+  This product includes software developed by The Apache Software
+  Foundation (http://www.apache.org/).
+
+  This product includes software developed by Hewlett-Packard:
+  (c) Copyright [2014-2015] Hewlett-Packard Development Company, L.P
+
+
+
+//*** Apache Log4j NOTICE  ***//
+
+Copyright 1999-2019 Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+ResolverUtil.java
+Copyright 2005-2006 Tim Fennell
+
+Dumbster SMTP test server
+Copyright 2004 Jason Paul Kitchen
+
+TypeUtil.java
+Copyright 2002-2012 Ramnivas Laddad, Juergen Hoeller, Chris Beams
+
+picocli (http://picocli.info)
+Copyright 2017 Remko Popma
+
+
+//*** Apache commons math NOTICE  ***//
+Apache Commons Math
+Copyright 2001-2019 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+This product includes software developed for Orekit by
+CS Systèmes d'Information (http://www.c-s.fr/)
+Copyright 2010-2012 CS Systèmes d'Information
+
+//*** Apache Spark NOTICE  ***//
+Copyright 2014 and onwards The Apache Software Foundation.
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Export Control Notice
+---------------------
+
+This distribution includes cryptographic software. The country in which you currently reside may have
+restrictions on the import, possession, use, and/or re-export to another country, of encryption software.
+BEFORE using any encryption software, please check your country's laws, regulations and policies concerning
+the import, possession, or use, and re-export of encryption software, to see if this is permitted. See
+<http://www.wassenaar.org/> for more information.
+
+The U.S. Government Department of Commerce, Bureau of Industry and Security (BIS), has classified this
+software as Export Commodity Control Number (ECCN) 5D002.C.1, which includes information security software
+using or performing cryptographic functions with asymmetric algorithms. The form and manner of this Apache
+Software Foundation distribution makes it eligible for export under the License Exception ENC Technology
+Software Unrestricted (TSU) exception (see the BIS Export Administration Regulations, Section 740.13) for
+both object code and source code.
+
+The following provides more details on the included cryptographic software:
+
+This software uses Apache Commons Crypto (https://commons.apache.org/proper/commons-crypto/) to
+support authentication, and encryption and decryption of data sent across the network between
+services.
+
+
+//*** ScalaTest NOTICE  ***//
+
+================================================================================
+==    NOTICE file corresponding to section 4(d) of the Apache License,        ==
+==    Version 2.0, in this case for the ScalaTest distribution.               ==
+================================================================================
+
+  - This product includes software developed by
+    Artima, Inc. (http://www.artima.com/).
+
+//*** ApacHe Hadoop NOTICE ***//
+Apache Hadoop
+Copyright 2006 and onwards The Apache Software Foundation.
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+Export Control Notice
+---------------------
+
+This distribution includes cryptographic software.  The country in
+which you currently reside may have restrictions on the import,
+possession, use, and/or re-export to another country, of
+encryption software.  BEFORE using any encryption software, please
+check your country's laws, regulations and policies concerning the
+import, possession, or use, and re-export of encryption software, to
+see if this is permitted.  See <http://www.wassenaar.org/> for more
+information.
+
+The U.S. Government Department of Commerce, Bureau of Industry and
+Security (BIS), has classified this software as Export Commodity
+Control Number (ECCN) 5D002.C.1, which includes information security
+software using or performing cryptographic functions with asymmetric
+algorithms.  The form and manner of this Apache Software Foundation
+distribution makes it eligible for export under the License Exception
+ENC Technology Software Unrestricted (TSU) exception (see the BIS
+Export Administration Regulations, Section 740.13) for both object
+code and source code.
+
+The following provides more details on the included cryptographic software:
+
+This software uses the SSL libraries from the Jetty project written
+by mortbay.org.
+Hadoop Yarn Server Web Proxy uses the BouncyCastle Java
+cryptography APIs written by the Legion of the Bouncy Castle Inc.	

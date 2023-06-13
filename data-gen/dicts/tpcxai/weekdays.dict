@@ -1,0 +1,11 @@
+create weekdays;
+set weights = 2;
+set types = (varchar);
+set names = (day : uniform, businessDays);
+add ("Monday"    : 1, 4.645);
+add ("Tuesday"   : 1, 6.453);
+add ("Wednesday" : 1, 11.23);
+add ("Thursday"  : 1, 6.1);
+add ("Friday"    : 1, 5.4);
+add ("Saturday"  : 1, 2.23);
+add ("Sunday"    : 1, 1.0);
