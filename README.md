@@ -25,8 +25,8 @@ TPC Express Benchmark AI (TPCx-AI) is an AI benchmark that models several aspect
 Two reference implementations are provided with this kit. The general process to enable the execution of the benchmark consists of the following steps:
 1. Setting up the execution environment: Involves installing and configuring the hardware (e.g. CPU, memory, network interfaces, etc.) and software (e.g. Operating system, drivers, compilers, system administration tools, etc.) to an optimal state for the execution of the benchmark.
 2. Setting up the benchmark: Includes installing dependencies needed by the kit to successfully run in your execution environment. This may include creating virtual environments, installing direct software dependencies for the kit, copying files to multiple nodes in the case of a cluster, etc. Additional details are provided in the *Setting up the benchmark* section below.
-3. Creating a benchmark configuration file: Involves editing one of the configuration files included in the kit to provide configuration parameters that optimize the usage of your system resources. The *driver/config* directory contains two sample configuration files: default.yaml and default-spark.yaml that can be used as configuration start point for the single-node and the multi-node implementations, respectively. 
-Changes to those configuration files are in general allowed. However, parameters that can be used to change the runtime characteristics of the use cases  (e.g. num_clusters, epochs), typically specified in the *training_template*, *serving_template*, and *serving_throughput_template* keys, have restrictions and cannot be changed unless speficied in Appendix C of the specification. Additional details are provided in the *Running the benchmark* and the *Additional details for the multi-node reference implementation* sections below. 
+3. Creating a benchmark configuration file: Involves editing one of the configuration files included in the kit to provide configuration parameters that optimize the usage of your system resources. The *driver/config* directory contains two sample configuration files: default.yaml and default-spark.yaml that can be used as configuration start point for the single-node and the multi-node implementations, respectively.
+Changes to those configuration files are in general allowed. However, parameters that can be used to change the runtime characteristics of the use cases  (e.g. num_clusters, epochs), typically specified in the *training_template*, *serving_template*, and *serving_throughput_template* keys, have restrictions and cannot be changed unless specified in Appendix C of the specification. Additional details are provided in the *Running the benchmark* and the *Additional details for the multi-node reference implementation* sections below.
 4. Running the benchmark: Execute all benchmark phases. More details on how to run the benchmark are provided in the *Benchmark workflow* and the *Running the benchmark* sections below.
 
 # Important
@@ -37,11 +37,11 @@ This document describes the TPCx-AI benchmark kit installation and execution on 
 # Setting up the benchmark
 Please follow the steps below to setup and run either the single-node implementation or the multi-node implementation.  We'll refer to the path where the benchmark root directory is located as <TPCx-AI_HOME>. For instance, if <TPCx-AI_HOME> is /opt/tpcx-ai, then the TPCx-AI_Benchmarkrun.sh file is located in /opt/tpcx-ai/run_benchmark.sh.
 
-Notes: 
-  * The setup process will install software packages listed in the .yml files included in the subidrectories of <TPCx-AI_HOME>/tools/. The .yml files included with the kit have versions that are known to work based on our tests and should be used for reference. Other versions (older or newer) of the same packages may or may NOT work. All versions of the packages need to comply with the software requirements (e.g. versioning, support, pricing, etc.) described in the specification document. 
+Notes:
+  * The setup process will install software packages listed in the .yml files included in the subidrectories of <TPCx-AI_HOME>/tools/. The .yml files included with the kit have versions that are known to work based on our tests and should be used for reference. Other versions (older or newer) of the same packages may or may NOT work. All versions of the packages need to comply with the software requirements (e.g. versioning, support, pricing, etc.) described in the specification document.
   In addition, the jar files included with the kit under the <TPCx-AI_HOME>/lib directory, excluding those under the <TPCx-AI_HOME>/lib/pdgf/ subdirectory, can be replaced for newer versions of the same package as long as they comply with the software requirements (e.g. versioning, support, pricing, etc.) described in the specification document.
   * The troubleshooting section below describes problems, workarounds, and limitations to common issues that can be found during the setup of the benchmark or its execution.
-  
+
 
 ## Single node ##
 
@@ -105,11 +105,11 @@ We include a *tools/spark/horovod_test_yarn.py* script that can help confirm the
 
 # Benchmark workflow
 
-The benchmark comprises 10 use cases that implement different AI or machine learning data science pipeline. The details of each use case can be found in the benchmark specification document. 
+The benchmark comprises 10 use cases that implement different AI or machine learning data science pipeline. The details of each use case can be found in the benchmark specification document.
 The TPCx-AI tests are initiated by the TPCx-AI_Validation.sh and the TPCx-AI_Benchmarkrun.sh master scripts which can be executed from <TPCx-AI_HOME> and run all phases of the benchmark. For a TPCx-AI benchmark run to be valid, the user needs to execute first the TPCx-AI_Validation.sh script and then the TPCx-AI_Benchmarkrun.sh run script. The TPCx-AI_Validation.sh script will run all phases of the benchmark using scale factor 1; its purpose is to confirm that the minimum requirements for the benchmark execution are in place and check whether the SUT is in a reasonably good initial state for the execution of a full benchmark run using a larger scale factor.
 
 The tests or phases performed by the benchmark are the following:
-- Data generation: The process of using PDGF to create the data in a format suitable for presentation to the load facility. 
+- Data generation: The process of using PDGF to create the data in a format suitable for presentation to the load facility.
 - Load Test: Copying the input dataset files to the final location from where they will be eventually accessed to execute each one of the use cases.
 - Power Training Test: Determines the maximum speed the SUT can process the Training of all 10 use cases by running their training phase sequentially (i.e. uc1 training, uc2 training, ..., uc10 training).
 - Power Serving Test I and II: Determines the maximum speed the SUT can process the Serving stages of all 10 use cases by running their serving phase sequentially (i.e. uc1 serving, uc2 serving, ..., uc10 serving).
@@ -149,7 +149,7 @@ After the benchmark is run, some scripts that collect system configuration infor
 
 
 
-# Additional details for the multi-node reference implementation 
+# Additional details for the multi-node reference implementation
 
 ## Configuration of spark-submit parameters ##
 - Set the spark configuration parameters in the configuration file you plan to use for your execution (See section on Spark configuration parameters below).
@@ -169,7 +169,7 @@ The LOADING phase of the benchmark will execute the *tools/python/create.sh* and
 
 For large scale factors (e.g. >=1000) we recommend that you enable *parallel data generation and loading* since it can reduce significantly the time required to generate data and to upload it to HDFS. When this option is enabled, the DATA_GENERATION and LOADING phases are divided among all the worker nodes in the cluster. To enable parallel data generation and loading the following configuration parameters need to be set in your configuration file (e.g. default-spark.yaml):
 - pdgf_node_parallel: True
-- Rename anchor &HDFS to &HDFS_BAK and rename &HDFS_PARALLEL to &HDFS in your configuration file (for instance driver/config/default-spark.yaml). Anchor &HDFS controls the commands that are executed during the LOADING phase, including create, load, delete, and download. Anchor &HDFS_PARALLEL contains commands used during parallel data generation and parallel load, in order to activate it, it needs to be renamed as &HDFS. 
+- Rename anchor &HDFS to &HDFS_BAK and rename &HDFS_PARALLEL to &HDFS in your configuration file (for instance driver/config/default-spark.yaml). Anchor &HDFS controls the commands that are executed during the LOADING phase, including create, load, delete, and download. Anchor &HDFS_PARALLEL contains commands used during parallel data generation and parallel load, in order to activate it, it needs to be renamed as &HDFS.
 - Run the *tools/enable_parallel_datagen.sh* script which will copy all necessary files and tools to the worker nodes to enable parallel data generation and loading.
 - For scale factors greater than 100 it's advisable that you increase the limit for the number of open files from the default to 16k or a larger value. The* /etc/security/limits.conf* file typically contains this configuration and might need your systems to be rebooted after changing it.
 
@@ -193,12 +193,12 @@ You can use the following steps to determine an initial set of good parameter va
  * For DL use cases (uc2, uc5 and uc9) set spark.executor.cores to ~80% the number of cores in your system, spark.executor.memory to approximately 80% of yarn.nodemanager.resource.memory-mb  and set the parameter num-executors to the number of nodes in your cluster. This will result in running one executor per node. The number of tensorflow tasks that will run in each executor is controlled by the --executor_cores_horovod and --task_cpus_horovod parameters (Details are presented above. Each Spark task will run a tensorflow instance). You can also set spark.executor.memoryOverhead to 10% of executor-memory.
 
 
-# Results 
-Once the benchmark finishes executing, it prints timing information and the performance metric. 
+# Results
+Once the benchmark finishes executing, it prints timing information and the performance metric.
 
 Log files containing runtime and output from running the benchmark are stored in the log/history subdirectory using the following format:  tpcxai_benchmark_(validation|run)_<date>_<time>. The folder will also be compressed in a .zip file with the same name of the subdirectory. In addition, execution results are also being stored in a SQLite DB located in log/tpcxai.db.
 
-Finally, two files named *report.txt* and *report.html* will be generated containing the final benchmark metric: *AIUCpm@SF*; and its composing elements: *Load Time (TLD)*, *Power Training Test (TPTT)*, *Power Serving Tests (TPST1, TPST2, and TPST)*, and *Throughput Test (TTT)*. The details of the metric computation can be found in the benchmark specification document available in the downloads section of the website. The report files will also contain information about the duration of the benchmark and the individual times spent in each phase of the benchmark, and 
+Finally, two files named *report.txt* and *report.html* will be generated containing the final benchmark metric: *AIUCpm@SF*; and its composing elements: *Load Time (TLD)*, *Power Training Test (TPTT)*, *Power Serving Tests (TPST1, TPST2, and TPST)*, and *Throughput Test (TTT)*. The details of the metric computation can be found in the benchmark specification document available in the downloads section of the website. The report files will also contain information about the duration of the benchmark and the individual times spent in each phase of the benchmark, and
 
 # Notes on Scale Factors (SF)
 

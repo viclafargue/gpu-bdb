@@ -41,20 +41,20 @@ import timeit
 
 # data frames
 from pathlib import Path
-import pandas as pd
-
-#logistic regression
-from sklearn.linear_model import LogisticRegression
 
 import joblib
+import pandas as pd
+
+# logistic regression
+from sklearn.linear_model import LogisticRegression
 
 
 def load_data(path_customers: str, path_transactions: str) -> pd.DataFrame:
     customer_data = pd.read_csv(path_customers)
     transaction_data = pd.read_csv(path_transactions)
-    customer_data['senderID'] = customer_data['fa_customer_sk']
+    customer_data["senderID"] = customer_data["fa_customer_sk"]
     data = pd.merge(transaction_data, customer_data, on="senderID")
-    return (data)
+    return data
 
 
 def hour_func(ts):
@@ -63,26 +63,28 @@ def hour_func(ts):
 
 def pre_process(data: pd.DataFrame) -> pd.DataFrame:
     data_pre = data
-    data_pre['time'] = pd.to_datetime(data_pre['time'])
-    data_pre['business_hour'] = data_pre['time'].apply(hour_func)
-    data_pre['amount_norm'] = data_pre['amount'] / data_pre['transaction_limit']
-    data_pre['business_hour_norm'] = data_pre['business_hour'] / 23
-    if 'isFraud' in data_pre.columns:
-        return data_pre[['transactionID', 'amount_norm', 'business_hour_norm', 'isFraud']]
+    data_pre["time"] = pd.to_datetime(data_pre["time"])
+    data_pre["business_hour"] = data_pre["time"].apply(hour_func)
+    data_pre["amount_norm"] = data_pre["amount"] / data_pre["transaction_limit"]
+    data_pre["business_hour_norm"] = data_pre["business_hour"] / 23
+    if "isFraud" in data_pre.columns:
+        return data_pre[
+            ["transactionID", "amount_norm", "business_hour_norm", "isFraud"]
+        ]
     else:
-        return data_pre[['transactionID', 'amount_norm', 'business_hour_norm']]
+        return data_pre[["transactionID", "amount_norm", "business_hour_norm"]]
 
 
 def train(data: pd.DataFrame) -> LogisticRegression:
-    lrn = LogisticRegression(solver='lbfgs',C=1.0)
+    lrn = LogisticRegression(solver="lbfgs", C=1.0)
     X_train = data[["business_hour_norm", "amount_norm"]]
-    y_train = data['isFraud']
+    y_train = data["isFraud"]
     return lrn.fit(X_train, y_train)
 
 
 def serve(model, data):
     data_serve = data[["business_hour_norm", "amount_norm"]]
-    data['isFraud'] = model.predict(data_serve)
+    data["isFraud"] = model.predict(data_serve)
     return data[["transactionID", "isFraud"]]
 
 
@@ -90,10 +92,12 @@ def main():
     model_file_name = "uc10.python.model"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--debug', action='store_true', required=False)
-    parser.add_argument('--stage', choices=['training', 'serving'], metavar='stage', required=True)
-    parser.add_argument('--workdir', metavar='workdir', required=True)
-    parser.add_argument('--output', metavar='output', required=False)
+    parser.add_argument("--debug", action="store_true", required=False)
+    parser.add_argument(
+        "--stage", choices=["training", "serving"], metavar="stage", required=True
+    )
+    parser.add_argument("--workdir", metavar="workdir", required=True)
+    parser.add_argument("--output", metavar="output", required=False)
     parser.add_argument("customers")
     parser.add_argument("transactions")
 
@@ -117,34 +121,34 @@ def main():
     (raw_data) = load_data(path_customers, path_transactions)
     end = timeit.default_timer()
     load_time = end - start
-    print('load time:\t', load_time)
+    print("load time:\t", load_time)
 
     start = timeit.default_timer()
     preprocessed_data = pre_process(raw_data)
     end = timeit.default_timer()
     pre_process_time = end - start
-    print('pre-process time:\t', pre_process_time)
+    print("pre-process time:\t", pre_process_time)
 
-    if stage == 'training':
+    if stage == "training":
         start = timeit.default_timer()
         model = train(preprocessed_data)
         end = timeit.default_timer()
         train_time = end - start
-        print('train time:\t', train_time)
+        print("train time:\t", train_time)
 
         joblib.dump(model, work_dir / model_file_name)
 
-    if stage == 'serving':
+    if stage == "serving":
         model = joblib.load(work_dir / model_file_name)
         start = timeit.default_timer()
         prediction = serve(model, preprocessed_data)
         end = timeit.default_timer()
         serve_time = end - start
-        print('serve time:\t', serve_time)
+        print("serve time:\t", serve_time)
 
         out_data = pd.DataFrame(prediction)
-        out_data.to_csv(output / 'predictions.csv', index=False)
+        out_data.to_csv(output / "predictions.csv", index=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

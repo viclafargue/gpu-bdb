@@ -27,7 +27,7 @@
 
 import queue
 import sqlite3
-from threading import Thread, BoundedSemaphore
+from threading import BoundedSemaphore, Thread
 
 
 class DatabaseQueue:
@@ -42,12 +42,16 @@ class DatabaseQueue:
         self.insert_queue = queue.Queue()
         self.stop_signaled = False
         self.db_semaphore = BoundedSemaphore(2)
-        self.db_thread = Thread(target=self._db_worker, args=(self.queue, ), daemon=True)
+        self.db_thread = Thread(target=self._db_worker, args=(self.queue,), daemon=True)
         self.db_thread.start()
-        self.db_thread_insert = Thread(target=self._db_worker, args=(self.insert_queue, ))
+        self.db_thread_insert = Thread(
+            target=self._db_worker, args=(self.insert_queue,)
+        )
         self.db_thread_insert.start()
-        db_uri = database_path.as_uri() + '?mode=ro'
-        self.query_connection = sqlite3.connect(db_uri, uri=True, check_same_thread=False)
+        db_uri = database_path.as_uri() + "?mode=ro"
+        self.query_connection = sqlite3.connect(
+            db_uri, uri=True, check_same_thread=False
+        )
 
     def query(self, query, *args) -> sqlite3.Cursor:
         """
@@ -117,7 +121,9 @@ class DatabaseQueue:
                     connection.execute(query, params)
                     connection.commit()
             except sqlite3.Error as e:
-                raise RuntimeError(f"An error occurred when running {query} with params: {params}") from e
+                raise RuntimeError(
+                    f"An error occurred when running {query} with params: {params}"
+                ) from e
             finally:
                 sql_queue.task_done()
 

@@ -14,14 +14,14 @@
 
 #
 # Copyright 2019 Intel Corporation.
-# This software and the related documents are Intel copyrighted materials, and your use of them 
-# is governed by the express license under which they were provided to you ("License"). Unless the 
-# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or 
+# This software and the related documents are Intel copyrighted materials, and your use of them
+# is governed by the express license under which they were provided to you ("License"). Unless the
+# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or
 # transmit this software or the related documents without Intel's prior written permission.
-# 
-# This software and the related documents are provided as is, with no express or implied warranties, 
+#
+# This software and the related documents are provided as is, with no express or implied warranties,
 # other than those that are expressly stated in the License.
-# 
+#
 #
 
 
@@ -33,19 +33,20 @@ import timeit
 import warnings
 from pathlib import Path
 
+import joblib
 import numpy as np
 import pandas as pd
 from statsmodels.tools.sm_exceptions import ValueWarning
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
-import joblib
 from tqdm import tqdm
 
 
 class UseCase03Model(object):
-
     def __init__(self, use_store=False, use_department=True):
         if not use_store and not use_department:
-            raise ValueError(f"use_store = {use_store}, use_department = {use_department}: at least one must be True")
+            raise ValueError(
+                f"use_store = {use_store}, use_department = {use_department}: at least one must be True"
+            )
 
         self._use_store = use_store
         self._use_department = use_department
@@ -78,36 +79,52 @@ class UseCase03Model(object):
 
 
 def load(order_path: str, lineitem_path: str, product_path: str) -> pd.DataFrame:
-    order_data = pd.read_csv(order_path, parse_dates=['date'])
+    order_data = pd.read_csv(order_path, parse_dates=["date"])
     lineitem_data = pd.read_csv(lineitem_path)
     product_data = pd.read_csv(product_path)
-    data = order_data.merge(lineitem_data, left_on='o_order_id', right_on='li_order_id')
-    data = data.merge(product_data, left_on='li_product_id', right_on='p_product_id')
+    data = order_data.merge(lineitem_data, left_on="o_order_id", right_on="li_order_id")
+    data = data.merge(product_data, left_on="li_product_id", right_on="p_product_id")
 
-    return data[['store', 'department', 'li_order_id', 'date', 'price', 'quantity']]
+    return data[["store", "department", "li_order_id", "date", "price", "quantity"]]
 
 
 def pre_process(data: pd.DataFrame) -> pd.DataFrame:
-    data['year'] = data['date'].dt.year
-    data['week'] = data['date'].dt.week
-    data['month'] = data['date'].dt.month
+    data["year"] = data["date"].dt.year
+    data["week"] = data["date"].dt.week
+    data["month"] = data["date"].dt.month
     # reset year in cases where one the last days of the week is in the new year
     # e.g. the last day of week 52 of 2011 is actual 2012-01-01
     # to get the proper year the year has to be reduced by 1 to 2011
     # in general whenever the month of the date is in january but the week is above 50 the year needs to be reduced
-    data['year'] = np.where((data['week'] > 50) & (data['month'] == 1), data['year'] - 1, data['year'])
-    data['row_price'] = data['quantity'] * data['price']
+    data["year"] = np.where(
+        (data["week"] > 50) & (data["month"] == 1), data["year"] - 1, data["year"]
+    )
+    data["row_price"] = data["quantity"] * data["price"]
 
-    grouped = data.groupby(['store', 'department', 'year', 'week'])['row_price'].sum().reset_index()
+    grouped = (
+        data.groupby(["store", "department", "year", "week"])["row_price"]
+        .sum()
+        .reset_index()
+    )
 
     def make_date(year, week, weekday):
         date_str = "{}-W{:02d}-{}".format(year, week, weekday)
-        date = datetime.datetime.strptime(date_str, '%G-W%V-%u')
+        date = datetime.datetime.strptime(date_str, "%G-W%V-%u")
         return date
 
-    grouped['date'] = grouped[['week', 'year']].apply(lambda r: make_date(r['year'], r['week'], 5), axis=1)
-    grouped = grouped.rename(index=str, columns={'store': 'Store', 'department': 'Dept', 'date': 'Date', 'row_price': 'Weekly_Sales'})
-    return grouped[['Store', 'Dept', 'Date', 'Weekly_Sales']]
+    grouped["date"] = grouped[["week", "year"]].apply(
+        lambda r: make_date(r["year"], r["week"], 5), axis=1
+    )
+    grouped = grouped.rename(
+        index=str,
+        columns={
+            "store": "Store",
+            "department": "Dept",
+            "date": "Date",
+            "row_price": "Weekly_Sales",
+        },
+    )
+    return grouped[["Store", "Dept", "Date", "Weekly_Sales"]]
 
 
 def train(data: pd.DataFrame) -> UseCase03Model:
@@ -118,18 +135,22 @@ def train(data: pd.DataFrame) -> UseCase03Model:
     :return: A UseCase03Models
     """
     models = UseCase03Model(use_store=True, use_department=True)
-    combinations = np.unique(data[['Store', 'Dept']].apply(lambda r: (r[0], r[1]), axis=1))
-    for c in tqdm(combinations, desc='Training'):
+    combinations = np.unique(
+        data[["Store", "Dept"]].apply(lambda r: (r[0], r[1]), axis=1)
+    )
+    for c in tqdm(combinations, desc="Training"):
         store = c[0]
         dept = c[1]
         ts_data = data[(data.Store == store) & (data.Dept == dept)]
         ts_min = ts_data.Date.min()
         ts_max = ts_data.Date.max()
-        ts_data = ts_data.set_index('Date')['Weekly_Sales'].sort_index()
+        ts_data = ts_data.set_index("Date")["Weekly_Sales"].sort_index()
         with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+            warnings.simplefilter("ignore")
             # add freq='W-Fri' would fail
-            model = ExponentialSmoothing(ts_data, seasonal='add', seasonal_periods=52).fit()
+            model = ExponentialSmoothing(
+                ts_data, seasonal="add", seasonal_periods=52
+            ).fit()
         print(f"{store},{dept},{ts_min},{ts_max}")
         models.store_model(store, dept, model, ts_min, ts_max)
 
@@ -144,9 +165,9 @@ def serve(model: UseCase03Model, data: pd.DataFrame) -> pd.DataFrame:
     :return: The forecasts for each department and each store of the desired length
     """
     # compute forecast for all store/department combinations in the data set
-    forecasts = pd.DataFrame(columns=['store', 'department', 'date', 'weekly_sales'])
+    forecasts = pd.DataFrame(columns=["store", "department", "date", "weekly_sales"])
     # combinations = np.unique(data[['Store', 'Dept']].values, axis=0)
-    for index, row in tqdm(data.iterrows(), desc='Forecasting', total=len(data)):
+    for index, row in tqdm(data.iterrows(), desc="Forecasting", total=len(data)):
         store = row.store
         dept = row.department
         periods = int(row.periods)
@@ -158,10 +179,19 @@ def serve(model: UseCase03Model, data: pd.DataFrame) -> pd.DataFrame:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=ValueWarning)
             forecast = current_model.forecast(periods)
-            forecast = np.clip(forecast, a_min=0.0, a_max=None)  # replace negative forecasts
+            forecast = np.clip(
+                forecast, a_min=0.0, a_max=None
+            )  # replace negative forecasts
         start = pd.date_range(ts_max, periods=2)[1]
-        forecast_idx = pd.date_range(start, periods=periods, freq='W-FRI')
-        df = pd.DataFrame({'store': store, 'department': dept, 'date': forecast_idx, 'weekly_sales': forecast})
+        forecast_idx = pd.date_range(start, periods=periods, freq="W-FRI")
+        df = pd.DataFrame(
+            {
+                "store": store,
+                "department": dept,
+                "date": forecast_idx,
+                "weekly_sales": forecast,
+            }
+        )
         forecasts = forecasts.append(df)
 
     return forecasts
@@ -169,11 +199,16 @@ def serve(model: UseCase03Model, data: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--debug', action='store_true', required=False)
-    parser.add_argument('--stage', choices=['training', 'serving', 'scoring'], metavar='stage', required=True)
-    parser.add_argument('--workdir', metavar='workdir', required=True)
-    parser.add_argument('--output', metavar='output', required=False)
-    parser.add_argument("path", nargs='+')
+    parser.add_argument("--debug", action="store_true", required=False)
+    parser.add_argument(
+        "--stage",
+        choices=["training", "serving", "scoring"],
+        metavar="stage",
+        required=True,
+    )
+    parser.add_argument("--workdir", metavar="workdir", required=True)
+    parser.add_argument("--output", metavar="output", required=False)
+    parser.add_argument("path", nargs="+")
 
     # configuration parameters
     args = parser.parse_args()
@@ -193,9 +228,9 @@ def main():
         os.makedirs(output)
 
     # derivative configuration parameters
-    model_file = work_dir / 'uc03.python.model'
+    model_file = work_dir / "uc03.python.model"
 
-    if stage == 'training':
+    if stage == "training":
         lineitem_path = args.path[1]
         product_path = args.path[2]
         start = timeit.default_timer()
@@ -203,29 +238,29 @@ def main():
         print(data.head())
         end = timeit.default_timer()
         load_time = end - start
-        print('load time:\t', load_time)
+        print("load time:\t", load_time)
 
         start = timeit.default_timer()
         data = pre_process(data)
         end = timeit.default_timer()
         pre_process_time = end - start
-        print('pre-process time:\t', pre_process_time)
+        print("pre-process time:\t", pre_process_time)
 
         start = timeit.default_timer()
         models = train(data)
         end = timeit.default_timer()
         train_time = end - start
-        print('train time:\t', train_time)
+        print("train time:\t", train_time)
 
         joblib.dump(models, model_file)
 
-    elif stage == 'serving':
+    elif stage == "serving":
         start = timeit.default_timer()
         data = pd.read_csv(order_path)
         print(data.head())
         end = timeit.default_timer()
         load_time = end - start
-        print('load time:\t', load_time)
+        print("load time:\t", load_time)
 
         models = joblib.load(model_file)
 
@@ -233,10 +268,10 @@ def main():
         forecasts = serve(models, data)
         end = timeit.default_timer()
         serve_time = end - start
-        print('serve time:\t', serve_time)
+        print("serve time:\t", serve_time)
 
-        forecasts.to_csv(output / 'predictions.csv', index=False)
+        forecasts.to_csv(output / "predictions.csv", index=False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

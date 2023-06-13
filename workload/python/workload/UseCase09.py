@@ -14,14 +14,14 @@
 
 #
 # Copyright 2021 Intel Corporation.
-# This software and the related documents are Intel copyrighted materials, and your use of them 
-# is governed by the express license under which they were provided to you ("License"). Unless the 
-# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or 
+# This software and the related documents are Intel copyrighted materials, and your use of them
+# is governed by the express license under which they were provided to you ("License"). Unless the
+# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or
 # transmit this software or the related documents without Intel's prior written permission.
-# 
-# This software and the related documents are provided as is, with no express or implied warranties, 
+#
+# This software and the related documents are provided as is, with no express or implied warranties,
 # other than those that are expressly stated in the License.
-# 
+#
 #
 
 
@@ -60,25 +60,28 @@ IMAGE_SIZE = 96
 
 
 def load_data(path) -> pd.DataFrame:
-    if path.endswith('.zip'):
+    if path.endswith(".zip"):
         # the given path is a zip file
         z = zipfile.ZipFile(path)
         getnames = z.namelist
         read = z.read
-    elif path.endswith('.tgz') or path.endswith('.tar.gz'):
+    elif path.endswith(".tgz") or path.endswith(".tar.gz"):
         # the given path is a compressed tarball
         z = tarfile.open(path)
         getnames = z.getnames
 
         def read(p):
             z.extractfile(p).read()
+
         z.close()
-		
+
     else:
         # the given path is a directory
         new_path = Path(path)
         if not new_path.exists():
-            raise NotADirectoryError(f"The given path {new_path.absolute()} is not a directory")
+            raise NotADirectoryError(
+                f"The given path {new_path.absolute()} is not a directory"
+            )
 
         def getnames():
             files = map(str, new_path.rglob("*"))
@@ -88,7 +91,7 @@ def load_data(path) -> pd.DataFrame:
 
         def read(p):
             b = None
-            with open(p, 'rb') as f:
+            with open(p, "rb") as f:
                 b = f.read()
             return b
 
@@ -98,34 +101,40 @@ def load_data(path) -> pd.DataFrame:
     paths = []
     names = getnames()
     for name in names:
-        if name.endswith('.jpg') or name.endswith('.png'):
+        if name.endswith(".jpg") or name.endswith(".png"):
             i += 1
             data = read(name)
             img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
-            identity = os.path.dirname(name).split('/')[-1]  # get the last directory from the path
+            identity = os.path.dirname(name).split("/")[
+                -1
+            ]  # get the last directory from the path
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             images.append(img)
             identities.append(identity)
             paths.append(name)
 
-    return pd.DataFrame({'identity': identities, 'path': paths, 'image': images})
+    return pd.DataFrame({"identity": identities, "path": paths, "image": images})
 
 
 def clean_data(data: pd.DataFrame):
-    data.groupby(['identity']).filter(lambda rows: len(rows) >= 10)
+    data.groupby(["identity"]).filter(lambda rows: len(rows) >= 10)
 
 
 def preprocess_data(data):
     res_path = Path(__file__).parent
-    res_path = res_path / 'resources/uc09/shape_predictor_5_face_landmarks.dat'
+    res_path = res_path / "resources/uc09/shape_predictor_5_face_landmarks.dat"
     aligner = AlignDlib(str(res_path))
 
-    def align_l(img): return align_image(aligner, img, IMAGE_SIZE)
-    data['image_aligned'] = data['image'].progress_apply(align_l)
+    def align_l(img):
+        return align_image(aligner, img, IMAGE_SIZE)
+
+    data["image_aligned"] = data["image"].progress_apply(align_l)
     zero = np.ndarray((IMAGE_SIZE, IMAGE_SIZE, 3))
     zero.fill(0.0)
-    data['image_aligned'] = data['image_aligned'].map(lambda img: zero if img is None else img)
-    data['image_aligned'] = data['image_aligned'] / 255
+    data["image_aligned"] = data["image_aligned"].map(
+        lambda img: zero if img is None else img
+    )
+    data["image_aligned"] = data["image_aligned"] / 255
     return data
 
 
@@ -133,11 +142,13 @@ def train_embedding(architecture, data, epochs, batch_size, loss, learning_rate=
     lr = learning_rate if learning_rate else 0.000001
     opt = optimizers.Adam(learning_rate=lr)
     architecture.compile(loss=loss, optimizer=opt)
-    x = np.stack(data['image_aligned'])
-    y = np.stack(data['identity'])
+    x = np.stack(data["image_aligned"])
+    y = np.stack(data["identity"])
     encoder = LabelEncoder()
     y = encoder.fit_transform(y)
-    history = architecture.fit(x, y, epochs=epochs, batch_size=batch_size, validation_split=0.1, verbose=2)
+    history = architecture.fit(
+        x, y, epochs=epochs, batch_size=batch_size, validation_split=0.1, verbose=2
+    )
     model_trained = history.model
     return model_trained
 
@@ -155,12 +166,21 @@ def train_classifier(data, epochs):
     # create keras model that is equivalent of a SVM
     model = Sequential()
     model.add(Dense(math.log2(num_classes), input_shape=(128,)))
-    model.add(Dense(num_classes, input_shape=(128, ), kernel_regularizer='l2', activation='linear'))
+    model.add(
+        Dense(
+            num_classes,
+            input_shape=(128,),
+            kernel_regularizer="l2",
+            activation="linear",
+        )
+    )
     model.summary(line_length=120)
     opt = Adadelta(learning_rate=0.1)
-    model.compile(optimizer=opt, loss='categorical_hinge')
-    early_stop = EarlyStopping(monitor='loss', patience=10, verbose=1)
-    model = model.fit(x, to_categorical(y), batch_size=32,  epochs=epochs, callbacks=[early_stop])
+    model.compile(optimizer=opt, loss="categorical_hinge")
+    early_stop = EarlyStopping(monitor="loss", patience=10, verbose=1)
+    model = model.fit(
+        x, to_categorical(y), batch_size=32, epochs=epochs, callbacks=[early_stop]
+    )
     return model.model, label_enc
 
 
@@ -185,7 +205,13 @@ def serve(model, label_encoder, data):
     predictions_encoded = label_encoder.inverse_transform(predictions_label)
     # convert path to integer, e.g. /path/to/file/01.png to 1
     samples = data.path.map(lambda s: int(os.path.splitext(os.path.split(s)[1])[0]))
-    return pd.DataFrame({'sample': samples, 'prediction': predictions_label, 'identity': predictions_encoded})
+    return pd.DataFrame(
+        {
+            "sample": samples,
+            "prediction": predictions_label,
+            "identity": predictions_encoded,
+        }
+    )
 
 
 def serve_svm(model, label_encoder, data):
@@ -195,7 +221,9 @@ def serve_svm(model, label_encoder, data):
     predictions_encoded = label_encoder.inverse_transform(predictions)
     # convert path to integer, e.g. /path/to/file/01.png to 1
     samples = data.path.map(lambda s: int(os.path.splitext(os.path.split(s)[1])[0]))
-    return pd.DataFrame({'sample': samples, 'prediction': predictions, 'identity': predictions_encoded})
+    return pd.DataFrame(
+        {"sample": samples, "prediction": predictions, "identity": predictions_encoded}
+    )
 
 
 def align_image(aligner: AlignDlib, img, image_size):
@@ -207,8 +235,13 @@ def align_image(aligner: AlignDlib, img, image_size):
     new_landmarks[33] = landmarks[4]
     new_landmarks[36] = landmarks[2]
     new_landmarks[45] = landmarks[0]
-    return aligner.align(image_size, img, bb, landmarks=new_landmarks,
-                         landmarkIndices=AlignDlib.OUTER_EYES_AND_NOSE)
+    return aligner.align(
+        image_size,
+        img,
+        bb,
+        landmarks=new_landmarks,
+        landmarkIndices=AlignDlib.OUTER_EYES_AND_NOSE,
+    )
 
 
 def to_embedding(embedding, img):
@@ -222,16 +255,22 @@ def main():
     model_file_name = "uc09.python.model"
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--nosvm', action='store_true', default=False)
-    parser.add_argument('--batch', metavar='SIZE', type=int, default=BATCH_SIZE_DEFAULT)
-    parser.add_argument('--epochs_embedding', metavar='N', type=int, default=EPOCHS_EMBEDDING_DEFAULT)
-    parser.add_argument('--epochs_classifier', metavar='N', type=int, default=EPOCHS_CLASSIFIER_DEFAULT)
-    parser.add_argument('--learning_rate', '-lr', required=False, type=float)
+    parser.add_argument("--nosvm", action="store_true", default=False)
+    parser.add_argument("--batch", metavar="SIZE", type=int, default=BATCH_SIZE_DEFAULT)
+    parser.add_argument(
+        "--epochs_embedding", metavar="N", type=int, default=EPOCHS_EMBEDDING_DEFAULT
+    )
+    parser.add_argument(
+        "--epochs_classifier", metavar="N", type=int, default=EPOCHS_CLASSIFIER_DEFAULT
+    )
+    parser.add_argument("--learning_rate", "-lr", required=False, type=float)
 
-    parser.add_argument('--debug', action='store_true', required=False)
-    parser.add_argument('--stage', choices=['training', 'serving'], metavar='stage', required=True)
-    parser.add_argument('--workdir', metavar='workdir', required=True)
-    parser.add_argument('--output', metavar='output', required=False)
+    parser.add_argument("--debug", action="store_true", required=False)
+    parser.add_argument(
+        "--stage", choices=["training", "serving"], metavar="stage", required=True
+    )
+    parser.add_argument("--workdir", metavar="workdir", required=True)
+    parser.add_argument("--output", metavar="output", required=False)
     parser.add_argument("filename")
 
     args = parser.parse_args()
@@ -260,7 +299,7 @@ def main():
     raw_data = load_data(path)
     end = timeit.default_timer()
     load_time = end - start
-    print('load time:\t', load_time)
+    print("load time:\t", load_time)
 
     loss = TripletHardLoss(margin=0.2)
 
@@ -268,35 +307,48 @@ def main():
     preprocessed_data = preprocess_data(raw_data)
     end = timeit.default_timer()
     pre_process_time = end - start
-    print('pre-process time:\t', pre_process_time)
+    print("pre-process time:\t", pre_process_time)
 
-    if stage == 'training':
+    if stage == "training":
         start = timeit.default_timer()
         embedding_pretrained = create_model()
         res_path = Path(__file__).parent
-        weights_path = res_path / 'resources/uc09/nn4.small2.v1.h5'
+        weights_path = res_path / "resources/uc09/nn4.small2.v1.h5"
         embedding_pretrained.load_weights(str(weights_path))
-        embedding = train_embedding(embedding_pretrained, preprocessed_data, epochs_embedding, batch_size, loss, learning_rate)
-        preprocessed_data['embedding'] = preprocessed_data['image_aligned'].apply(
-            lambda img: to_embedding(embedding, img))
+        embedding = train_embedding(
+            embedding_pretrained,
+            preprocessed_data,
+            epochs_embedding,
+            batch_size,
+            loss,
+            learning_rate,
+        )
+        preprocessed_data["embedding"] = preprocessed_data["image_aligned"].apply(
+            lambda img: to_embedding(embedding, img)
+        )
         if nosvm:
             model, label_enc = train_classifier(preprocessed_data, epochs_classifier)
         else:
             model, label_enc = train_classifier_svm(preprocessed_data)
         end = timeit.default_timer()
         train_time = end - start
-        print('train time:\t', train_time)
+        print("train time:\t", train_time)
 
-        save_model(embedding, work_dir / f"{model_file_name}.embedding", save_format='h5')
+        save_model(
+            embedding, work_dir / f"{model_file_name}.embedding", save_format="h5"
+        )
         if nosvm:
-            save_model(model, work_dir / model_file_name, save_format='h5')
+            save_model(model, work_dir / model_file_name, save_format="h5")
         else:
             joblib.dump(model, work_dir / model_file_name)
         joblib.dump(label_enc, work_dir / f"{model_file_name}.enc")
 
-    if stage == 'serving':
-        embedding = load_model(work_dir / f"{model_file_name}.embedding", compile=False,
-                               custom_objects={'TripletHardLoss': loss})
+    if stage == "serving":
+        embedding = load_model(
+            work_dir / f"{model_file_name}.embedding",
+            compile=False,
+            custom_objects={"TripletHardLoss": loss},
+        )
         if nosvm:
             model = load_model(work_dir / model_file_name)
         else:
@@ -304,19 +356,22 @@ def main():
         label_enc = joblib.load(work_dir / f"{model_file_name}.enc")
         start = timeit.default_timer()
         # get the 128-D embedding for each aligned image
-        preprocessed_data['embedding'] = preprocessed_data['image_aligned'].apply(
-            lambda img: to_embedding(embedding, img))
+        preprocessed_data["embedding"] = preprocessed_data["image_aligned"].apply(
+            lambda img: to_embedding(embedding, img)
+        )
         if nosvm:
             prediction = serve(model, label_enc, preprocessed_data)
         else:
             prediction = serve_svm(model, label_enc, preprocessed_data)
         end = timeit.default_timer()
         serve_time = end - start
-        print('serve time:\t', serve_time)
+        print("serve time:\t", serve_time)
 
         out_data = prediction
-        out_data[['sample', 'identity']].sort_values('sample').to_csv(output / 'predictions.csv', index=False)
+        out_data[["sample", "identity"]].sort_values("sample").to_csv(
+            output / "predictions.csv", index=False
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

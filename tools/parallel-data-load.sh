@@ -16,14 +16,14 @@
 
 #
 # Copyright 2021 Intel Corporation.
-# This software and the related documents are Intel copyrighted materials, and your use of them 
-# is governed by the express license under which they were provided to you ("License"). Unless the 
-# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or 
+# This software and the related documents are Intel copyrighted materials, and your use of them
+# is governed by the express license under which they were provided to you ("License"). Unless the
+# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or
 # transmit this software or the related documents without Intel's prior written permission.
-# 
-# This software and the related documents are provided as is, with no express or implied warranties, 
+#
+# This software and the related documents are provided as is, with no express or implied warranties,
 # other than those that are expressly stated in the License.
-# 
+#
 #
 
 
@@ -39,7 +39,7 @@ then
 elif [ $# -lt 3 ]
 then
   usage
-fi 
+fi
 
 nodes=`cat $1 | grep -v '^ *#'`;
 node_count=`echo $nodes | wc -w`
@@ -48,7 +48,7 @@ threads=$2
 destination=$3
 FILES_TO_LOAD=${@:4}
 
-for src in $FILES_TO_LOAD; do  
+for src in $FILES_TO_LOAD; do
   file=$(basename -- $src)
   for node in $nodes; do
     is_dir=`ssh $node "if [[ -d $src ]]; then echo "1"; else echo "0"; fi"`
@@ -83,4 +83,3 @@ elif [ $FAIL -eq 1 ]; then
 else
   echo "$FAIL jobs failed"
 fi
-

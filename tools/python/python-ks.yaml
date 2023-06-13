@@ -1,3 +1,4 @@
+---
 #
 # Copyright (C) 2021 Transaction Processing Performance Council (TPC) and/or its contributors.
 # This file is part of a software package distributed by the TPC
@@ -65,5 +66,4 @@ dependencies:
   - pip
   - pip:
 #-workloads
-    - tensorflow-addons==0.15.0
-
+      - tensorflow-addons==0.15.0

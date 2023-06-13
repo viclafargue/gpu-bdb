@@ -26,7 +26,7 @@
 import os
 import queue
 import signal
-import subprocess # nosec - the subprocess module is a crucial component to enable the flexibility to add other implementations of this benchmark.
+import subprocess  # nosec - the subprocess module is a crucial component to enable the flexibility to add other implementations of this benchmark.
 import threading
 import time
 from pathlib import Path
@@ -38,30 +38,45 @@ state = queue.Queue()
 
 
 def run_and_capture(command, logger, verbose=False, **kvargs):
-    proc_out = {'stdout': [], 'stderr': []}
-    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1,
-                          universal_newlines=True, **kvargs) as p:
+    proc_out = {"stdout": [], "stderr": []}
+    with subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        bufsize=1,
+        universal_newlines=True,
+        **kvargs,
+    ) as p:
         for line in p.stdout:
             logger.log_out(line)
-            proc_out['stdout'].append(line)
+            proc_out["stdout"].append(line)
             if verbose:
-                print(line, end='', flush=True)
+                print(line, end="", flush=True)
 
-    result = subprocess.CompletedProcess(p.args, p.returncode, ''.join(proc_out['stdout']), ''.join(proc_out['stderr']))
+    result = subprocess.CompletedProcess(
+        p.args, p.returncode, "".join(proc_out["stdout"]), "".join(proc_out["stderr"])
+    )
     return result
 
 
 def run_and_log(command, logger, stop_event: threading.Event, verbose=False, **kvargs):
-    os.environ['PYTHONUNBUFFERED'] = '1'
-    with subprocess.Popen(command, start_new_session=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1,
-                          universal_newlines=True, **kvargs) as p:
+    os.environ["PYTHONUNBUFFERED"] = "1"
+    with subprocess.Popen(
+        command,
+        start_new_session=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        bufsize=1,
+        universal_newlines=True,
+        **kvargs,
+    ) as p:
         # append process id to global state
         # this is used to kill the process/ process group from a different thread
         state.put(p.pid)
-        forbidden_words = ['b\'', '\'', r'\n', r'\r']
+        forbidden_words = ["b'", "'", r"\n", r"\r"]
         for line in p.stdout:
             for w in forbidden_words:
-                line = line.replace(w, '')
+                line = line.replace(w, "")
             line = line.strip()
             if stop_event.is_set():
                 break
@@ -70,9 +85,16 @@ def run_and_log(command, logger, stop_event: threading.Event, verbose=False, **k
 
 
 def run_as_daemon(command, logger, stop_event, verbose=False, **kvargs):
-    thread_kvargs = {'command': command.split(), 'logger': logger, 'stop_event': stop_event, 'verbose': verbose,
-                     **kvargs}
-    daemon_thread = threading.Thread(target=run_and_log, kwargs=thread_kvargs, daemon=True)
+    thread_kvargs = {
+        "command": command.split(),
+        "logger": logger,
+        "stop_event": stop_event,
+        "verbose": verbose,
+        **kvargs,
+    }
+    daemon_thread = threading.Thread(
+        target=run_and_log, kwargs=thread_kvargs, daemon=True
+    )
     return daemon_thread
 
 
@@ -93,12 +115,24 @@ def stop_daemons(stop_event):
 
 
 class Stream(threading.Thread):
-
-    def __init__(self, index, name, actions, db_queue, benchmark_sk, log_file: Path, verboses, tpcxai_home,
-                 killall_event, **kvargs):
+    def __init__(
+        self,
+        index,
+        name,
+        actions,
+        db_queue,
+        benchmark_sk,
+        log_file: Path,
+        verboses,
+        tpcxai_home,
+        killall_event,
+        **kvargs,
+    ):
         if not (len(actions) == len(verboses)):
-            raise ValueError(f'lengths of the parameters must match: '
-                             f'len(actions)={len(actions)}, len(verboses)={len(verboses)}')
+            raise ValueError(
+                f"lengths of the parameters must match: "
+                f"len(actions)={len(actions)}, len(verboses)={len(verboses)}"
+            )
         threading.Thread.__init__(self)
         self.index = index
         self.name = name
@@ -114,7 +148,9 @@ class Stream(threading.Thread):
         self.timings = []
         self.log_file = log_file
         self.adabench_home = tpcxai_home
-        use_case_sk = self.db_queue.query("SELECT max(command_sk) FROM command").fetchone()[0]
+        use_case_sk = self.db_queue.query(
+            "SELECT max(command_sk) FROM command"
+        ).fetchone()[0]
         use_case_sk = use_case_sk + 1 if use_case_sk else 1
         self.base_usecase_sk = use_case_sk
 
@@ -127,42 +163,81 @@ class Stream(threading.Thread):
             else:
                 msg = []
                 if action.subphase.value == SubPhase.INIT.value:
-                    msg.append(f"stream {self.name} initializing {action.phase} for uc {action.use_case}")
+                    msg.append(
+                        f"stream {self.name} initializing {action.phase} for uc {action.use_case}"
+                    )
                 elif action.subphase.value == SubPhase.PREPARATION.value:
-                    msg.append(f"stream {self.name} preparing {action.phase} for uc {action.use_case}")
+                    msg.append(
+                        f"stream {self.name} preparing {action.phase} for uc {action.use_case}"
+                    )
                 else:
-                    msg.append(f"stream {self.name} running {action.phase} for uc {action.use_case}")
+                    msg.append(
+                        f"stream {self.name} running {action.phase} for uc {action.use_case}"
+                    )
 
                 use_case_sk = self.base_usecase_sk + self.index + i
-                self.db_queue.insert('''
+                self.db_queue.insert(
+                    """
                                       INSERT INTO command (command_sk, benchmark_fk, use_case, phase, phase_run, sub_phase, command)
                                       VALUES (?, ?, ?, ?, ?, ?, ?)
-                                      ''',
-                                     (use_case_sk, self.benchmark_sk, action.use_case,
-                                      str(action.phase), action.run, str(action.subphase), str(action.command)))
-                self.db_queue.insert('INSERT INTO stream (use_case_fk, stream) VALUES (?, ?)', (use_case_sk, self.name))
+                                      """,
+                    (
+                        use_case_sk,
+                        self.benchmark_sk,
+                        action.use_case,
+                        str(action.phase),
+                        action.run,
+                        str(action.subphase),
+                        str(action.command),
+                    ),
+                )
+                self.db_queue.insert(
+                    "INSERT INTO stream (use_case_fk, stream) VALUES (?, ?)",
+                    (use_case_sk, self.name),
+                )
                 log_dir = self.log_file.parent
-                action_log_file = log_dir / f"{self.log_file.stem}-{action.phase}-{action.run}-{self.name}-{action.use_case}.out"
+                action_log_file = (
+                    log_dir
+                    / f"{self.log_file.stem}-{action.phase}-{action.run}-{self.name}-{action.use_case}.out"
+                )
 
                 start = time.perf_counter()
                 start_time = time.time()
-                with FileAndDBLogger(use_case_sk, action_log_file, self.db_queue) as logger:
+                with FileAndDBLogger(
+                    use_case_sk, action_log_file, self.db_queue
+                ) as logger:
                     if action.working_dir is not None:
-                        result = run_and_capture(action.command, logger, verbose, cwd=action.working_dir, **self.kvargs)
+                        result = run_and_capture(
+                            action.command,
+                            logger,
+                            verbose,
+                            cwd=action.working_dir,
+                            **self.kvargs,
+                        )
                     else:
-                        result = run_and_capture(action.command, logger, verbose, cwd=self.adabench_home,  **self.kvargs)
+                        result = run_and_capture(
+                            action.command,
+                            logger,
+                            verbose,
+                            cwd=self.adabench_home,
+                            **self.kvargs,
+                        )
                 end = time.perf_counter()
                 end_time = time.time()
                 duration = round(end - start, 3)
-                self.db_queue.insert('UPDATE command SET return_code = ?, start_time = ?, end_time = ?, runtime = ? WHERE command_sk = ?',
-                                     (result.returncode, start_time, end_time, duration, use_case_sk))
+                self.db_queue.insert(
+                    "UPDATE command SET return_code = ?, start_time = ?, end_time = ?, runtime = ? WHERE command_sk = ?",
+                    (result.returncode, start_time, end_time, duration, use_case_sk),
+                )
                 self.timings.append(duration)
                 msg.append(f"in {duration}")
-                print('\n'.join(msg))
+                print("\n".join(msg))
                 self.results[i] = result
                 self.last_idx = i
                 if result.returncode != 0:
-                    self.exc = RuntimeError(f"command {action.command} return {result.returncode}")
+                    self.exc = RuntimeError(
+                        f"command {action.command} return {result.returncode}"
+                    )
                     self.killall_event.set()
                 i += 1
 
@@ -171,4 +246,3 @@ class Stream(threading.Thread):
 
     def last_action(self):
         return self.actions[self.last_idx]
-

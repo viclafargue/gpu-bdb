@@ -1,123 +1,124 @@
-- name: Configure TPCx-AI
-  hosts: all
-  vars:
-    FILE_ROOT: /tmp
-    ANACONDA_FILE: Anaconda3-2021.11-Linux-x86_64.sh
-    ANACONDA_URL: "https://repo.anaconda.com/archive/{{ ANACONDA_FILE }}"
-    ANACONDA_MD5: md5:40354cb10cadaf6b1cfeed36610839f4
-    ANACONDA_ROOT: /opt/anaconda3
-    OPENMPI_VER: 4.0.3
-    OPENMPI_FILE: "openmpi-{{ OPENMPI_VER }}.tar.gz"
-    OPENMPI_URL: "https://download.open-mpi.org/release/open-mpi/v4.0/{{ OPENMPI_FILE }}"
-    OPENMPI_MD5: md5:f4be54a4358a536ec2cdc694c7200f0b
-    OPENMPI_ROOT: "{{ FILE_ROOT }}/openmpi-{{ OPENMPI_VER }}"
-    CONDA_ENV: adabench_dl
-    CONDA_ENV_ROOT: /usr/envs
-    CONDA_ENV_DIR: "{{ CONDA_ENV_ROOT }}/{{ CONDA_ENV }}"
-  environment:
-    HTTP_PROXY: "{{ lookup('env','http_proxy') or lookup('env','HTTP_PROXY') }}"
-    HTTPS_PROXY: "{{ lookup('env','https_proxy') or lookup('env','HTTPS_PROXY') }}"
-    NO_PROXY: "{{ lookup('env','no_proxy') or lookup('env','NO_PROXY') }}"
-  tasks:
+---
+  - name: Configure TPCx-AI
+    hosts: all
+    vars:
+      FILE_ROOT: /tmp
+      ANACONDA_FILE: Anaconda3-2021.11-Linux-x86_64.sh
+      ANACONDA_URL: https://repo.anaconda.com/archive/{{ ANACONDA_FILE }}
+      ANACONDA_MD5: md5:40354cb10cadaf6b1cfeed36610839f4
+      ANACONDA_ROOT: /opt/anaconda3
+      OPENMPI_VER: 4.0.3
+      OPENMPI_FILE: openmpi-{{ OPENMPI_VER }}.tar.gz
+      OPENMPI_URL: https://download.open-mpi.org/release/open-mpi/v4.0/{{ OPENMPI_FILE }}
+      OPENMPI_MD5: md5:f4be54a4358a536ec2cdc694c7200f0b
+      OPENMPI_ROOT: '{{ FILE_ROOT }}/openmpi-{{ OPENMPI_VER }}'
+      CONDA_ENV: adabench_dl
+      CONDA_ENV_ROOT: /usr/envs
+      CONDA_ENV_DIR: '{{ CONDA_ENV_ROOT }}/{{ CONDA_ENV }}'
+    environment:
+      HTTP_PROXY: "{{ lookup('env','http_proxy') or lookup('env','HTTP_PROXY') }}"
+      HTTPS_PROXY: "{{ lookup('env','https_proxy') or lookup('env','HTTPS_PROXY') }}"
+      NO_PROXY: "{{ lookup('env','no_proxy') or lookup('env','NO_PROXY') }}"
+    tasks:
 
-    - name: install debian packages
-      package:
-        name:
-          - build-essential
-          - libgl-dev
-          - libglvnd0
-          - libsndfile1-dev
-          - libsndfile1
-          - libxxf86vm-dev
-          - libxxf86vm1
-          - pssh
-      become: yes
-      when: ansible_facts['os_family'] == 'Debian'
+      - name: install debian packages
+        package:
+          name:
+            - build-essential
+            - libgl-dev
+            - libglvnd0
+            - libsndfile1-dev
+            - libsndfile1
+            - libxxf86vm-dev
+            - libxxf86vm1
+            - pssh
+        become: yes
+        when: ansible_facts['os_family'] == 'Debian'
 
-    - name: install redhat packages
-      package:
-        name:
-          - devtoolset-9
-          - mesa-libGL-devel
-          - libglvnd-glx
-          - libsndfile-devel
-          - libsndfile
-          - libXxf86vm-devel
-          - libXxf86vm
-          - pssh
-      become: yes
-      when: ansible_facts['os_family'] == 'RedHat'
+      - name: install redhat packages
+        package:
+          name:
+            - devtoolset-9
+            - mesa-libGL-devel
+            - libglvnd-glx
+            - libsndfile-devel
+            - libsndfile
+            - libXxf86vm-devel
+            - libXxf86vm
+            - pssh
+        become: yes
+        when: ansible_facts['os_family'] == 'RedHat'
 
-    - name: download anaconda
-      get_url:
-        url: "{{ ANACONDA_URL }}"
-        dest: "{{ FILE_ROOT }}/{{ ANACONDA_FILE }}"
-        checksum: "{{ ANACONDA_MD5 }}"
+      - name: download anaconda
+        get_url:
+          url: '{{ ANACONDA_URL }}'
+          dest: '{{ FILE_ROOT }}/{{ ANACONDA_FILE }}'
+          checksum: '{{ ANACONDA_MD5 }}'
 
-    - name: install anaconda
-      shell: "bash {{ FILE_ROOT }}/{{ ANACONDA_FILE }} -b -p {{ ANACONDA_ROOT }}"
-      args:
-        creates: "{{ ANACONDA_ROOT }}"
-      become: yes
+      - name: install anaconda
+        shell: bash {{ FILE_ROOT }}/{{ ANACONDA_FILE }} -b -p {{ ANACONDA_ROOT }}
+        args:
+          creates: '{{ ANACONDA_ROOT }}'
+        become: yes
 
-    - name: init anaconda
-      shell: "{{ ANACONDA_ROOT }}/bin/conda init bash"
-      become: yes
+      - name: init anaconda
+        shell: '{{ ANACONDA_ROOT }}/bin/conda init bash'
+        become: yes
 
-    - name: deactivate anaconda auto base
-      shell: "{{ ANACONDA_ROOT }}/bin/conda config --set auto_activate_base false"
-      args:
-        creates: "~/.condarc"
-      become: yes
+      - name: deactivate anaconda auto base
+        shell: '{{ ANACONDA_ROOT }}/bin/conda config --set auto_activate_base false'
+        args:
+          creates: ~/.condarc
+        become: yes
 
-    - name: download openmpi
-      get_url:
-        url: "{{ OPENMPI_URL }}"
-        dest: "{{ FILE_ROOT }}/{{ OPENMPI_FILE }}"
-        checksum: "{{ OPENMPI_MD5 }}"
+      - name: download openmpi
+        get_url:
+          url: '{{ OPENMPI_URL }}'
+          dest: '{{ FILE_ROOT }}/{{ OPENMPI_FILE }}'
+          checksum: '{{ OPENMPI_MD5 }}'
 
-    - name: extract openmpi archive
-      unarchive:
-        src: "{{ FILE_ROOT }}/{{ OPENMPI_FILE }}"
-        dest: "{{ FILE_ROOT }}"
-        creates: "{{ OPENMPI_ROOT }}"
-        remote_src: True
+      - name: extract openmpi archive
+        unarchive:
+          src: '{{ FILE_ROOT }}/{{ OPENMPI_FILE }}'
+          dest: '{{ FILE_ROOT }}'
+          creates: '{{ OPENMPI_ROOT }}'
+          remote_src: true
 
-    - name: build openmpi
-      shell: "./configure; make -j {{ ansible_processor_cores }}"
-      args:
-        chdir: "{{ OPENMPI_ROOT }}"
-        creates: "{{ OPENMPI_ROOT }}/Makefile"
+      - name: build openmpi
+        shell: ./configure; make -j {{ ansible_processor_cores }}
+        args:
+          chdir: '{{ OPENMPI_ROOT }}'
+          creates: '{{ OPENMPI_ROOT }}/Makefile'
 
-    - name: install openmpi
-      shell: "make install; ldconfig"
-      args:
-        chdir: "{{ OPENMPI_ROOT }}"
-        creates: /usr/local/lib/openmpi
-      become: yes
+      - name: install openmpi
+        shell: make install; ldconfig
+        args:
+          chdir: '{{ OPENMPI_ROOT }}'
+          creates: /usr/local/lib/openmpi
+        become: yes
 
-    - name: create conda env root
-      file:
-        path: "{{ CONDA_ENV_ROOT }}"
-        state: directory
-        mode: '0777'
-      become: yes
+      - name: create conda env root
+        file:
+          path: '{{ CONDA_ENV_ROOT }}'
+          state: directory
+          mode: '0777'
+        become: yes
 
-    - name: distribute build_dl.yml file
-      copy:
-        src: build_dl.yml
-        dest: "{{ CONDA_ENV_ROOT }}/build_dl.yml"
+      - name: distribute build_dl.yml file
+        copy:
+          src: build_dl.yml
+          dest: '{{ CONDA_ENV_ROOT }}/build_dl.yml'
 
-    - name: install anaconda prerequisite
-      shell: "{{ ANACONDA_ROOT }}/bin/conda install -y gcc_linux-64 gxx_linux-64 cmake"
-      become: yes
+      - name: install anaconda prerequisite
+        shell: '{{ ANACONDA_ROOT }}/bin/conda install -y gcc_linux-64 gxx_linux-64 cmake'
+        become: yes
 
-    - name: create anaconda virtual environment
-      shell: "{{ ANACONDA_ROOT }}/bin/conda create -y -p {{ CONDA_ENV_DIR }} python=3.7"
-      args:
-        creates: "{{ CONDA_ENV_DIR }}"
+      - name: create anaconda virtual environment
+        shell: '{{ ANACONDA_ROOT }}/bin/conda create -y -p {{ CONDA_ENV_DIR }} python=3.7'
+        args:
+          creates: '{{ CONDA_ENV_DIR }}'
 
-    - name: install tpcx-ai dependencies
-      shell: "{{ ANACONDA_ROOT }}/bin/conda env update -p {{CONDA_ENV_DIR}} --file {{ CONDA_ENV_ROOT }}/build_dl.yml"
-      args:
-        creates: "{{ CONDA_ENV_DIR }}/lib/python3.7/site-packages/pyarrow"
+      - name: install tpcx-ai dependencies
+        shell: '{{ ANACONDA_ROOT }}/bin/conda env update -p {{CONDA_ENV_DIR}} --file {{ CONDA_ENV_ROOT }}/build_dl.yml'
+        args:
+          creates: '{{ CONDA_ENV_DIR }}/lib/python3.7/site-packages/pyarrow'

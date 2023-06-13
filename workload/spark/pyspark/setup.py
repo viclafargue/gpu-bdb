@@ -26,12 +26,12 @@
 
 
 #
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="tpcxai-workload-pyspark",
     version="0.1",
     packages=find_packages(),
-#    install_requires=['numpy', 'tensorflow>=2', 'pyspark>=2.4', 'horovod>=0.19', 'petastorm', 'h5py==2.10', 'joblib',
-#                      'opencv-python', 'dlib', 'pyarrow']
+    #    install_requires=['numpy', 'tensorflow>=2', 'pyspark>=2.4', 'horovod>=0.19', 'petastorm', 'h5py==2.10', 'joblib',
+    #                      'opencv-python', 'dlib', 'pyarrow']
 )

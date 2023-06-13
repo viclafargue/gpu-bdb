@@ -65,7 +65,7 @@ if [ ${BENCHMARK_RUN_EXIT_CODE} -eq "0" ]; then
    echo "Finished saving output data"
    echo ""
 
-   echo "Saving execution enviroment details..."
+   echo "Saving execution environment details..."
    bash ${TPCxAI_ENV_TOOLS_DIR}/getEnvInfo.sh
    echo "Finished saving environment details"
    echo ""

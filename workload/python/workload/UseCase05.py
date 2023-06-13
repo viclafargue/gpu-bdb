@@ -28,11 +28,11 @@ import os
 import timeit
 from pathlib import Path
 
+import joblib
 import pandas as pd
 import tensorflow as tf
-import joblib
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Embedding, Dense, GRU
+from tensorflow.keras.layers import GRU, Dense, Embedding
 from tensorflow.keras.losses import mean_squared_error, mean_squared_logarithmic_error
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -40,21 +40,21 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 
 
 def load(path) -> pd.DataFrame:
-    f = open(path, 'r', encoding="utf8")
+    f = open(path, "r", encoding="utf8")
     list_of_lines = f.readlines()
     f.close()
-    list_of_lines[0] = list_of_lines[0].replace('"', '')
-    f = open(path, 'w', encoding="utf8")
+    list_of_lines[0] = list_of_lines[0].replace('"', "")
+    f = open(path, "w", encoding="utf8")
     f.writelines(list_of_lines)
     f.close()
-    data = pd.read_csv(path, sep='|', quoting=3)
+    data = pd.read_csv(path, sep="|", quoting=3)
     return data
 
 
 def pre_process(data: pd.DataFrame, tokenizer=None):
-    data['description'] = data.description.str[1:-1]
+    data["description"] = data.description.str[1:-1]
     text_data = data.description
-    if 'price' in data.columns:
+    if "price" in data.columns:
         labels = data.price
     else:
         labels = None
@@ -66,12 +66,26 @@ def pre_process(data: pd.DataFrame, tokenizer=None):
     return labels, data_seq_pad, tokenizer
 
 
-def train(architecture, labels, features, loss=mean_squared_error, epochs=10, batch_size=4096,
-          learning_rate=None) -> tf.keras.callbacks.History:
+def train(
+    architecture,
+    labels,
+    features,
+    loss=mean_squared_error,
+    epochs=10,
+    batch_size=4096,
+    learning_rate=None,
+) -> tf.keras.callbacks.History:
     lr = learning_rate if learning_rate else 0.001
     architecture.compile(optimizer=Adam(learning_rate=lr), loss=loss)
     print(architecture.summary())
-    return architecture.fit(features, labels, batch_size=batch_size, epochs=epochs, verbose=1, validation_split=0.3)
+    return architecture.fit(
+        features,
+        labels,
+        batch_size=batch_size,
+        epochs=epochs,
+        verbose=1,
+        validation_split=0.3,
+    )
 
 
 def make_bi_lstm(tokenizer_len):
@@ -80,7 +94,7 @@ def make_bi_lstm(tokenizer_len):
     rnn_model.add(GRU(16))
     rnn_model.add(Dense(128))
     rnn_model.add(Dense(64))
-    rnn_model.add(Dense(1, activation='linear'))
+    rnn_model.add(Dense(1, activation="linear"))
     return rnn_model
 
 
@@ -92,20 +106,25 @@ def main():
     parser = argparse.ArgumentParser()
 
     # use-case specific parameters
-    parser.add_argument('--loss', choices=['mse', 'msle'], default='mse')
-    parser.add_argument('--epochs', metavar='N', type=int, default=15)
-    parser.add_argument('--batch', metavar='N', type=int, default=4096)
-    parser.add_argument('--learning_rate', '-lr', required=False, type=float)
+    parser.add_argument("--loss", choices=["mse", "msle"], default="mse")
+    parser.add_argument("--epochs", metavar="N", type=int, default=15)
+    parser.add_argument("--batch", metavar="N", type=int, default=4096)
+    parser.add_argument("--learning_rate", "-lr", required=False, type=float)
 
-    parser.add_argument('--debug', action='store_true', required=False)
-    parser.add_argument('--stage', choices=['training', 'serving', 'scoring'], metavar='stage', required=True)
-    parser.add_argument('--workdir', metavar='workdir', required=True)
-    parser.add_argument('--output', metavar='output', required=False)
+    parser.add_argument("--debug", action="store_true", required=False)
+    parser.add_argument(
+        "--stage",
+        choices=["training", "serving", "scoring"],
+        metavar="stage",
+        required=True,
+    )
+    parser.add_argument("--workdir", metavar="workdir", required=True)
+    parser.add_argument("--output", metavar="output", required=False)
     parser.add_argument("filename")
 
     # configuration parameters
     args = parser.parse_args()
-    loss = mean_squared_error if args.loss == 'mse' else mean_squared_logarithmic_error
+    loss = mean_squared_error if args.loss == "mse" else mean_squared_logarithmic_error
     epochs = args.epochs
     batch = args.batch
     learning_rate = args.learning_rate if args.learning_rate else None
@@ -125,34 +144,36 @@ def main():
         os.makedirs(output)
 
     # derivative configuration parameters
-    model_file = work_dir / 'uc05.python.model'
-    tokenizer_file = work_dir / 'uc05.python.tok'
+    model_file = work_dir / "uc05.python.model"
+    tokenizer_file = work_dir / "uc05.python.tok"
 
     start = timeit.default_timer()
     data = load(path)
     end = timeit.default_timer()
     load_time = end - start
-    print('load time:\t', load_time)
+    print("load time:\t", load_time)
 
-    if stage == 'training':
+    if stage == "training":
         start = timeit.default_timer()
         (labels, features, tokenizer) = pre_process(data)
         end = timeit.default_timer()
         pre_process_time = end - start
-        print('pre-process time:\t', pre_process_time)
+        print("pre-process time:\t", pre_process_time)
 
         start = timeit.default_timer()
         tok_len = len(tokenizer.word_index) + 1
         architecture = make_bi_lstm(tok_len)
-        history = train(architecture, labels, features, loss, epochs, batch, learning_rate)
+        history = train(
+            architecture, labels, features, loss, epochs, batch, learning_rate
+        )
         end = timeit.default_timer()
         train_time = end - start
-        print('train time:\t', train_time)
+        print("train time:\t", train_time)
 
         history.model.save(str(model_file))
         joblib.dump(tokenizer, tokenizer_file)
 
-    elif stage == 'serving':
+    elif stage == "serving":
         tokenizer = joblib.load(tokenizer_file)
         model = tf.keras.models.load_model(str(model_file))
 
@@ -160,17 +181,19 @@ def main():
         (labels, features, tokenizer) = pre_process(data, tokenizer)
         end = timeit.default_timer()
         pre_process_time = end - start
-        print('pre-process time:\t', pre_process_time)
+        print("pre-process time:\t", pre_process_time)
 
         start = timeit.default_timer()
         price_suggestions = serve(model, features)
         end = timeit.default_timer()
         serve_time = end - start
-        print('serve time:\t', serve_time)
+        print("serve time:\t", serve_time)
 
         # negative price suggestions need to be changed to 0: .clip(min=0)
-        df = pd.DataFrame({'id': data['id'], 'price': price_suggestions.ravel().clip(min=0)})
-        df.to_csv(output / 'predictions.csv', index=False, sep='|')
+        df = pd.DataFrame(
+            {"id": data["id"], "price": price_suggestions.ravel().clip(min=0)}
+        )
+        df.to_csv(output / "predictions.csv", index=False, sep="|")
 
 
 if __name__ == "__main__":

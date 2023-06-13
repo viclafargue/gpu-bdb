@@ -14,18 +14,20 @@
 
 #
 # Copyright 2021 Intel Corporation.
-# This software and the related documents are Intel copyrighted materials, and your use of them 
-# is governed by the express license under which they were provided to you ("License"). Unless the 
-# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or 
+# This software and the related documents are Intel copyrighted materials, and your use of them
+# is governed by the express license under which they were provided to you ("License"). Unless the
+# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or
 # transmit this software or the related documents without Intel's prior written permission.
-# 
-# This software and the related documents are provided as is, with no express or implied warranties, 
+#
+# This software and the related documents are provided as is, with no express or implied warranties,
 # other than those that are expressly stated in the License.
-# 
+#
 #
 
 
 import re
+
+
 def levenshtein(a, b):
     """
     Calculates the Levenshtein distance between a and b.
@@ -37,13 +39,13 @@ def levenshtein(a, b):
         a, b = b, a
         n, m = m, n
 
-    current = list(range(n+1))
-    for i in range(1, m+1):
-        previous, current = current, [i]+[0]*n
-        for j in range(1, n+1):
-            add, delete = previous[j]+1, current[j-1]+1
-            change = previous[j-1]
-            if a[j-1] != b[i-1]:
+    current = list(range(n + 1))
+    for i in range(1, m + 1):
+        previous, current = current, [i] + [0] * n
+        for j in range(1, n + 1):
+            add, delete = previous[j] + 1, current[j - 1] + 1
+            change = previous[j - 1]
+            if a[j - 1] != b[i - 1]:
                 change = change + 1
             current[j] = min(add, delete, change)
 
@@ -58,8 +60,9 @@ def word_error_rate(y_true, y_pred, pre_process=True):
     :param y_pred: ndarray of predicted texts
     :return: the word-error-rate as a float
     """
+
     def pre_proc(string):
-        return re.sub('[^a-z \']', '', string.lower())
+        return re.sub("[^a-z ']", "", string.lower())
 
     def lev(first_str, second_str):
         first_str = str(first_str)
@@ -71,6 +74,7 @@ def word_error_rate(y_true, y_pred, pre_process=True):
             first_norm = first_str.lower()
             second_norm = second_str.lower()
         return levenshtein(first_norm.split(), second_norm.split())
+
     distances = map(lev, y_true, y_pred)
     lengths = map(lambda txt: len(str(txt).split()), y_true)
     return sum(distances) / sum(lengths)

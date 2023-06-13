@@ -14,21 +14,21 @@
 
 #
 # Copyright 2019 Intel Corporation.
-# This software and the related documents are Intel copyrighted materials, and your use of them 
-# is governed by the express license under which they were provided to you ("License"). Unless the 
-# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or 
+# This software and the related documents are Intel copyrighted materials, and your use of them
+# is governed by the express license under which they were provided to you ("License"). Unless the
+# License provides otherwise, you may not use, modify, copy, publish, distribute, disclose or
 # transmit this software or the related documents without Intel's prior written permission.
-# 
-# This software and the related documents are provided as is, with no express or implied warranties, 
+#
+# This software and the related documents are provided as is, with no express or implied warranties,
 # other than those that are expressly stated in the License.
-# 
+#
 #
 
 
 from enum import Enum
 from functools import total_ordering
 from string import Template
-from typing import List, Dict, Union
+from typing import Dict, List, Union
 
 
 @total_ordering
@@ -64,9 +64,14 @@ class SubPhase(Enum):
 
 
 class Action:
-
-    def __init__(self, use_case: int, phase: Phase,
-                 sub_phase: SubPhase = SubPhase.NONE, metadata=None, run=1):
+    def __init__(
+        self,
+        use_case: int,
+        phase: Phase,
+        sub_phase: SubPhase = SubPhase.NONE,
+        metadata=None,
+        run=1,
+    ):
         self.use_case = use_case
         self.phase = phase
         self.subphase = sub_phase
@@ -76,44 +81,82 @@ class Action:
 
 
 class SubprocessAction(Action):
-
-    def __init__(self, use_case: int, command: str, phase: Phase, sub_phase: SubPhase = SubPhase.NONE,
-                 working_dir=None, metadata=None):
+    def __init__(
+        self,
+        use_case: int,
+        command: str,
+        phase: Phase,
+        sub_phase: SubPhase = SubPhase.NONE,
+        working_dir=None,
+        metadata=None,
+    ):
         super().__init__(use_case, phase, sub_phase, metadata)
         self.command = command
         self.working_dir = working_dir
 
 
 class DaemonAction(SubprocessAction):
-
-    def __init__(self, use_case: int, command: str, phase: Phase, sub_phase: SubPhase = SubPhase.NONE,
-                 working_dir=None, metadata=None):
+    def __init__(
+        self,
+        use_case: int,
+        command: str,
+        phase: Phase,
+        sub_phase: SubPhase = SubPhase.NONE,
+        working_dir=None,
+        metadata=None,
+    ):
         super().__init__(use_case, command, phase, sub_phase, working_dir, metadata)
 
 
 class PythonAction(Action):
-
-    def __init__(self, use_case: int, phase: Phase, sub_phase: SubPhase = SubPhase.NONE, metadata=None):
+    def __init__(
+        self,
+        use_case: int,
+        phase: Phase,
+        sub_phase: SubPhase = SubPhase.NONE,
+        metadata=None,
+    ):
         super().__init__(use_case, phase, sub_phase, metadata)
 
 
 class ScoringAction(PythonAction):
-
-    def __init__(self, use_case: int, scoring_params: Dict, phase: Phase, sub_phase: SubPhase = SubPhase.NONE,
-                 metadata=None):
+    def __init__(
+        self,
+        use_case: int,
+        scoring_params: Dict,
+        phase: Phase,
+        sub_phase: SubPhase = SubPhase.NONE,
+        metadata=None,
+    ):
         super().__init__(use_case, phase, sub_phase, metadata)
         self.scoring_params = scoring_params
         self.verification: Union[None, VerificationAction] = None
 
-    def add_verification(self, metric_name: str, metric_threshold: float, metric_higher_is_better: bool):
-        self.verification = VerificationAction(self.use_case, metric_name, metric_threshold, metric_higher_is_better,
-                                               Phase.VERIFICATION, SubPhase.WORK, self.metadata)
+    def add_verification(
+        self, metric_name: str, metric_threshold: float, metric_higher_is_better: bool
+    ):
+        self.verification = VerificationAction(
+            self.use_case,
+            metric_name,
+            metric_threshold,
+            metric_higher_is_better,
+            Phase.VERIFICATION,
+            SubPhase.WORK,
+            self.metadata,
+        )
 
 
 class VerificationAction(PythonAction):
-
-    def __init__(self, use_case: int, metric_name: str, metric_threshold: float, metric_larger_is_better: bool,
-                 phase: Phase, sub_phase: SubPhase = SubPhase.NONE, metadata=None):
+    def __init__(
+        self,
+        use_case: int,
+        metric_name: str,
+        metric_threshold: float,
+        metric_larger_is_better: bool,
+        phase: Phase,
+        sub_phase: SubPhase = SubPhase.NONE,
+        metadata=None,
+    ):
         super().__init__(use_case, phase, sub_phase, metadata)
         self.metric_name = metric_name
         self.metric_threshold = metric_threshold
@@ -130,18 +173,27 @@ class VerificationAction(PythonAction):
             else:
                 return self.metric <= self.metric_threshold
         else:
-            raise RuntimeError('No metric has been set. Please set a metric with `add_metric`.')
+            raise RuntimeError(
+                "No metric has been set. Please set a metric with `add_metric`."
+            )
 
     def get_metric_command(self):
-        comparator = '>=' if self.metric_larger_is_better else '<='
+        comparator = ">=" if self.metric_larger_is_better else "<="
         return f"{self.metric} {comparator} {self.metric_threshold}"
 
 
 class DataStore:
-
-    def __init__(self, name: str, create_template: Template, copy_template: Template,
-                 load_template: Template, load_dir_template: Template,
-                 delete_template: Template, download_template: Template, delete_parallel_template: Template = None):
+    def __init__(
+        self,
+        name: str,
+        create_template: Template,
+        copy_template: Template,
+        load_template: Template,
+        load_dir_template: Template,
+        delete_template: Template,
+        download_template: Template,
+        delete_parallel_template: Template = None,
+    ):
         self.name = name
         self.create = create_template
         self.copy = copy_template
@@ -153,22 +205,35 @@ class DataStore:
 
 
 def datastore_from_dict(dictionary: dict):
-    load_dir = dictionary['load_directory'] if 'load_directory' in dictionary else dictionary['load']
+    load_dir = (
+        dictionary["load_directory"]
+        if "load_directory" in dictionary
+        else dictionary["load"]
+    )
     load_dir = Template(load_dir)
-    if 'delete_parallel' in dictionary:
-        return DataStore(dictionary['name'],
-                         Template(dictionary['create']), Template(dictionary['copy']),
-                         Template(dictionary['load']), load_dir,
-                         Template(dictionary['delete']), Template(dictionary['download']),
-                         Template(dictionary['delete_parallel']))
+    if "delete_parallel" in dictionary:
+        return DataStore(
+            dictionary["name"],
+            Template(dictionary["create"]),
+            Template(dictionary["copy"]),
+            Template(dictionary["load"]),
+            load_dir,
+            Template(dictionary["delete"]),
+            Template(dictionary["download"]),
+            Template(dictionary["delete_parallel"]),
+        )
     else:
-        return DataStore(dictionary['name'],
-                         Template(dictionary['create']), Template(dictionary['copy']),
-                         Template(dictionary['load']), load_dir,
-                         Template(dictionary['delete']), Template(dictionary['download']))
+        return DataStore(
+            dictionary["name"],
+            Template(dictionary["create"]),
+            Template(dictionary["copy"]),
+            Template(dictionary["load"]),
+            load_dir,
+            Template(dictionary["delete"]),
+            Template(dictionary["download"]),
+        )
 
 
 class Metadata:
-
     def __init__(self, num_records):
         self.num_records = num_records

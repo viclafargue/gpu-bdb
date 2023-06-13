@@ -3,10 +3,11 @@
 import argparse
 import os.path
 import sys
-#from Crypto.Hash import SHA256
+
+# from Crypto.Hash import SHA256
 from hashlib import sha256
 from pathlib import Path
-from typing import List, Iterable
+from typing import Iterable, List
 
 
 def get_paths(paths_str: str, basedir) -> List[Path]:
@@ -19,20 +20,28 @@ def get_paths(paths_str: str, basedir) -> List[Path]:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--ignore', metavar="IGNORE PATTERN", action='append', required=False, type=str, default=[])
-    parser.add_argument('--home', metavar='HOME DIR', required=False, type=str)
-    parser.add_argument('-o', '--output', metavar='FILE', required=False, type=str)
-    parser.add_argument('path', metavar='PATH', nargs='+', type=str)
+    parser.add_argument(
+        "-i",
+        "--ignore",
+        metavar="IGNORE PATTERN",
+        action="append",
+        required=False,
+        type=str,
+        default=[],
+    )
+    parser.add_argument("--home", metavar="HOME DIR", required=False, type=str)
+    parser.add_argument("-o", "--output", metavar="FILE", required=False, type=str)
+    parser.add_argument("path", metavar="PATH", nargs="+", type=str)
 
     args = parser.parse_args()
     ignore_patterns = args.ignore
-    home_dir = Path(args.home) if args.home else Path('.')
+    home_dir = Path(args.home) if args.home else Path(".")
     paths = get_paths(args.path, basedir=home_dir)
     output = args.output if args.output else sys.stdout
 
     files_to_checksum = get_files_to_checksum(paths, ignore_patterns)
 
-    output_file = open(output, 'w') if output != sys.stdout else output
+    output_file = open(output, "w") if output != sys.stdout else output
 
     for file in files_to_checksum:
         file_checksum = hash_file(file)
@@ -55,13 +64,13 @@ def get_files_to_checksum(paths: Iterable[Path], ignore_patterns):
     return files_to_checksum
 
 
-def hash_file(file: Path, buffer_size=64*1024):
+def hash_file(file: Path, buffer_size=64 * 1024):
     done = False
     checksum = sha256()
-    with open(file, 'rb', buffering=0) as bin_file:
+    with open(file, "rb", buffering=0) as bin_file:
         while not done:
             data = bin_file.read(buffer_size)
-            if len(data)>0:
+            if len(data) > 0:
                 checksum.update(data)
             else:
                 done = True
@@ -74,5 +83,5 @@ def is_file_ignored(ignore_patterns, file):
     return any(matches)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

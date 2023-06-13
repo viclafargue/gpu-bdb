@@ -36,7 +36,7 @@ FILES_TO_LOAD=${@:2}
 #Loop through list of files/folders to upload
 for FILE in $FILES_TO_LOAD; do
 
-   # If it's a regular file copy it to hdfs, else if its a directory create a 
+   # If it's a regular file copy it to hdfs, else if its a directory create a
    # sequence file and copy the sequence file to hdfs
    if [ -f $FILE ]; then
       echo "Loading file $FILE to $DESTINATION"

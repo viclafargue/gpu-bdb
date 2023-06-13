@@ -1,4 +1,4 @@
--- 
+--
 
 -- General layout: (<value>,<value>,.. : <weight>, <weight>,..);
 -- Note the : delimiter separating values from weights.
@@ -14,12 +14,12 @@
 --  * uniform  - every day has the same likleyhood
 --  * busyDaysIndustry - weekdays are more frequent then weekend days (industry does not do much businiess over weekend)
 --  * buysDaysRestaurants - where as restaurants on the other hand have their most bussy days on the weekend.
--- 
+--
 
 create exampleList;    -- used to identify a list by name 'exampleList'
 set weights = 3;         -- number for weight columns
 --set types for "values" is mandatory, specifing type for "weight" is optional (first add() row  determines type)
-set types = (varchar, int, int: int, double, double);   
+set types = (varchar, int, int: int, double, double);
 set names = (day, isWorkDay, isWeekend :  uniform , busyDaysIndustry, buysDaysRestaurants );    --set names is optional. Every column can be accessed by index starting at 0
 add ("Sunday",    0, 1: 1, 1.0   ,7.2 );
 add ("Monday",    1, 0: 1, 4.645 ,1.4 );
@@ -31,21 +31,21 @@ add ("Saturday",  0, 1: 1, 2.23  ,9.2 );
 
 
 --
--- 
+--
 --
 -- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 -- Begin distribution definitions
 -- =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 ------
 -- calendar
---      value			weight
---      =====			======
---  1   day number		uniform, non-leap year
---  2   month name		uniform, leap year
---  3   day of month	sales liklihood (skewed)
---  4   season			"" "" (leap year)
---  5   month number	returns liklihood (skewed)
---  6   quarter			"" "" (leap year)
+--      value           weight
+--      =====           ======
+--  1   day number      uniform, non-leap year
+--  2   month name      uniform, leap year
+--  3   day of month    sales liklihood (skewed)
+--  4   season          "" "" (leap year)
+--  5   month number    returns liklihood (skewed)
+--  6   quarter         "" "" (leap year)
 --  7   first of month  combined skew (low+medium_high)
 --  8   is_holiday      low
 --  9                   medium
@@ -329,98 +329,98 @@ add (271,  "September", 27, "Fall",  9, 3, 245, 0:1, 1, 66, 66, 29, 29, 66, 0, 1
 add (272,  "September", 28, "Fall",  9, 3, 245, 0:1, 1, 66, 66, 29, 29, 66, 0, 1, 0);
 add (273,  "September", 29, "Fall",  9, 3, 245, 0:1, 1, 66, 66, 29, 29, 66, 0, 1, 0);
 add (274,  "September", 30, "Fall",  9, 3, 245, 0:1, 1, 66, 66, 29, 29, 66, 0, 1, 0);
-add (275,  "October",  1, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (276,  "October",  2, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (277,  "October",  3, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (278,  "October",  4, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (279,  "October",  5, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (280,  "October",  6, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (281,  "October",  7, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (282,  "October",  8, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (283,  "October",  9, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (284,  "October", 10, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (285,  "October", 11, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (286,  "October", 12, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (287,  "October", 13, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (288,  "October", 14, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (289,  "October", 15, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (290,  "October", 16, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (291,  "October", 17, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (292,  "October", 18, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (293,  "October", 19, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (294,  "October", 20, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (295,  "October", 21, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (296,  "October", 22, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (297,  "October", 23, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (298,  "October", 24, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (299,  "October", 25, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (300,  "October", 26, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (301,  "October", 27, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (302,  "October", 28, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (303,  "October", 29, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (304,  "October", 30, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (305,  "October", 31, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0); 
-add (306,  "November",  1, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (307,  "November",  2, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (308,  "November",  3, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (309,  "November",  4, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (310,  "November",  5, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (311,  "November",  6, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (312,  "November",  7, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (313,  "November",  8, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (314,  "November",  9, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (315,  "November", 10, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (316,  "November", 11, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (317,  "November", 12, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (318,  "November", 13, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (319,  "November", 14, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (320,  "November", 15, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (321,  "November", 16, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (322,  "November", 17, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (323,  "November", 18, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (324,  "November", 19, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (325,  "November", 20, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (326,  "November", 21, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (327,  "November", 22, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (328,  "November", 23, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (329,  "November", 24, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (330,  "November", 25, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (331,  "November", 26, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (332,  "November", 27, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (333,  "November", 28, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (334,  "November", 29, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (335,  "November", 30, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (336,  "December",  1, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (337,  "December",  2, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (338,  "December",  3, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (339,  "December",  4, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (340,  "December",  5, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (341,  "December",  6, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (342,  "December",  7, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (343,  "December",  8, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (344,  "December",  9, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (345,  "December", 10, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (346,  "December", 11, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (347,  "December", 12, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (348,  "December", 13, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (349,  "December", 14, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (350,  "December", 15, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (351,  "December", 16, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (352,  "December", 17, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (353,  "December", 18, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (354,  "December", 19, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (355,  "December", 20, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (356,  "December", 21, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (357,  "December", 22, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (358,  "December", 23, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (359,  "December", 24, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (360,  "December", 25, "Winter",  12, 4, 336, 1: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (361,  "December", 26, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (362,  "December", 27, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (363,  "December", 28, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (364,  "December", 29, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (365,  "December", 30, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
-add (366,  "December", 31, "Winter",  12, 4, 336, 1: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1); 
+add (275,  "October",  1, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (276,  "October",  2, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (277,  "October",  3, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (278,  "October",  4, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (279,  "October",  5, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (280,  "October",  6, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (281,  "October",  7, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (282,  "October",  8, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (283,  "October",  9, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (284,  "October", 10, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (285,  "October", 11, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (286,  "October", 12, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (287,  "October", 13, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (288,  "October", 14, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (289,  "October", 15, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (290,  "October", 16, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (291,  "October", 17, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (292,  "October", 18, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (293,  "October", 19, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (294,  "October", 20, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (295,  "October", 21, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (296,  "October", 22, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (297,  "October", 23, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (298,  "October", 24, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (299,  "October", 25, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (300,  "October", 26, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (301,  "October", 27, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (302,  "October", 28, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (303,  "October", 29, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (304,  "October", 30, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (305,  "October", 31, "Fall",  10, 4, 275, 0: 1, 1, 66, 66, 66, 66, 66, 0, 1, 0);
+add (306,  "November",  1, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (307,  "November",  2, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (308,  "November",  3, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (309,  "November",  4, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (310,  "November",  5, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (311,  "November",  6, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (312,  "November",  7, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (313,  "November",  8, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (314,  "November",  9, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (315,  "November", 10, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (316,  "November", 11, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (317,  "November", 12, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (318,  "November", 13, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (319,  "November", 14, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (320,  "November", 15, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (321,  "November", 16, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (322,  "November", 17, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (323,  "November", 18, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (324,  "November", 19, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (325,  "November", 20, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (326,  "November", 21, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (327,  "November", 22, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (328,  "November", 23, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (329,  "November", 24, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (330,  "November", 25, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (331,  "November", 26, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (332,  "November", 27, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (333,  "November", 28, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (334,  "November", 29, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (335,  "November", 30, "Fall",  11, 4, 306, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (336,  "December",  1, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (337,  "December",  2, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (338,  "December",  3, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (339,  "December",  4, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (340,  "December",  5, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (341,  "December",  6, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (342,  "December",  7, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (343,  "December",  8, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (344,  "December",  9, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (345,  "December", 10, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (346,  "December", 11, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (347,  "December", 12, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (348,  "December", 13, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (349,  "December", 14, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (350,  "December", 15, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (351,  "December", 16, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (352,  "December", 17, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (353,  "December", 18, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (354,  "December", 19, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (355,  "December", 20, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (356,  "December", 21, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (357,  "December", 22, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (358,  "December", 23, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (359,  "December", 24, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (360,  "December", 25, "Winter",  12, 4, 336, 1: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (361,  "December", 26, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (362,  "December", 27, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (363,  "December", 28, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (364,  "December", 29, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (365,  "December", 30, "Winter",  12, 4, 336, 0: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
+add (366,  "December", 31, "Winter",  12, 4, 336, 1: 1, 1, 100, 100, 66, 66, 100, 0, 0, 1);
 
 ------
 -- week_info
@@ -446,14 +446,14 @@ add ("Saturday", 0, 1: 1);
 -- cities.dst
 -- the 1000 most common place names, from the USGS list of populated places
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. city name	1. skewed from USGS (usgs)
---			2. uniform (uniform)
---			3. large cities (large)
---			4. medium step (medium)
---			5. small cities (small)
---			6. unified step function
+--  1. city name    1. skewed from USGS (usgs)
+--          2. uniform (uniform)
+--          3. large cities (large)
+--          4. medium step (medium)
+--          5. small cities (small)
+--          6. unified step function
 ------
 create cities;
 set types = (varchar);
@@ -1464,7 +1464,7 @@ add ("Parkwood":14, 1, 0, 1, 0, 30);
 --
 --
 --
--- 
+--
 -- adjectives.dst based on the common word list
 create adjectives;
 set types = (varchar);
@@ -2404,7 +2404,7 @@ add ("abstract":1);
 add ("absent":1);
 add ("above":1);
 
--- 
+--
 -- adverbs
 -- from the common word list
 create adverbs;
@@ -3350,7 +3350,7 @@ add ("no":3);
 add ("every":1);
 
 --
--- nouns 
+-- nouns
 -- from the common word list
 create nouns;
 set types = (varchar);
@@ -4572,7 +4572,7 @@ add ("apropos":1);
 add ("addition to":1);
 add ("according":1);
 
--- 
+--
 -- verbs
 -- from the common word list
 create verbs;
@@ -6058,8 +6058,8 @@ add ("accord":1);
 add ("abuse":1);
 
 
--- 
--- auxiliary.dst sentence forms 
+--
+-- auxiliary.dst sentence forms
 create auxiliaries;
 set types = (varchar);
 set weights = 1;
@@ -6085,8 +6085,8 @@ add ("would": 2);
 add ("would not": 1);
 
 
--- 
--- terminator.dst 
+--
+-- terminator.dst
 create terminators;
 set types = (varchar);
 set weights = 1;
@@ -6096,8 +6096,8 @@ add (" --": 1);
 add (":": 1);
 
 
--- 
--- sentences.dst sentence forms 
+--
+-- sentences.dst sentence forms
 create sentences;
 set types = (varchar);
 set weights = 1;
@@ -6200,8 +6200,8 @@ add ("D J N X V D D J NT": 1);
 
 
 
--- 
--- syllables.dst 
+--
+-- syllables.dst
 create syllables;
 set types = (varchar);
 set weights = 1;
@@ -6222,14 +6222,14 @@ add ("eing":1);
 --
 --
 
--- fields						weights (aliases in parens)
--- ======						=======
--- 1: FIPS code	(fips)			1: uniform (uniform)
--- 2: county name (name) 		2: population (population)
--- 3: state abreviation (st)	3: timezone weighting (tz)
--- 4: full state name (state)	4: in zone1 (tz90)
--- 5: ZIP prefix (zone)			5: in zone2 (tz9)
--- 6: gmt offset (gmt)			6 in zone3 (tz1)
+-- fields                       weights (aliases in parens)
+-- ======                       =======
+-- 1: FIPS code (fips)          1: uniform (uniform)
+-- 2: county name (name)        2: population (population)
+-- 3: state abreviation (st)    3: timezone weighting (tz)
+-- 4: full state name (state)   4: in zone1 (tz90)
+-- 5: ZIP prefix (zone)         5: in zone2 (tz9)
+-- 6: gmt offset (gmt)          6 in zone3 (tz1)
 --
 -- NOTE: missing data for St. Clair County, AL
 -- NOTE: missing data for St. Francis County, AR
@@ -6260,7 +6260,7 @@ add ("eing":1);
 ------
 create fips_county;
 set types = (int, varchar, varchar, varchar, varchar, int);
-set weights = 6; 
+set weights = 6;
 set names = (fips, county, st, state, zone, gmt:uniform, population, tz, tz90, tz9, tz1);
 add (47187,"Williamson County", "TN", "Tennesee", "3", -5:1, 117569, 1387, 1, 0, 0);
 add (46137,"Ziebach County", "SD", "South Dakota", "5", -6:1, 2176, 1148, 1, 0, 0);
@@ -9376,15 +9376,15 @@ add (16087,"Washington County", "ID", "Idaho", "8", -7:1, 10171, 4647, 1, 0, 0);
 --
 ------
 -- categories
--- values			weights
+-- values           weights
 -- -----------------------
---	1. name			1. uniform
---	2. class dist name
---  3. Use Size? 
+--  1. name         1. uniform
+--  2. class dist name
+--  3. Use Size?
 ------
 create categories;
 set types = (varchar, varchar, int);
-set weights = 1; 
+set weights = 1;
 add ("women", "women_class", 1: 1);
 add ("men", "men_class", 1: 1);
 add ("children", "children_class", 1: 1);
@@ -9399,10 +9399,10 @@ add ("electronics", "electronic_class", 0: 1);
 ------
 -- women_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create women_class;
 set types = (varchar, int);
@@ -9415,10 +9415,10 @@ add ("swimwear", 2: 1);
 ------
 -- men_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create men_class;
 set types = (varchar, int);
@@ -9431,10 +9431,10 @@ add ("sports-apparel", 2: 1);
 ------
 -- children_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create children_class;
 set types = (varchar, int);
@@ -9447,10 +9447,10 @@ add ("school-uniforms", 2: 1);
 ------
 -- shoe_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create shoe_class;
 set types = (varchar, int);
@@ -9463,10 +9463,10 @@ add ("athletic", 2: 1);
 ------
 -- music_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create music_class;
 set types = (varchar, int);
@@ -9479,10 +9479,10 @@ add ("classical", 2: 1);
 ------
 -- jewelry_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create jewelry_class;
 set types = (varchar, int);
@@ -9507,10 +9507,10 @@ add ("consignment", 8: 1);
 ------
 -- home_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create home_class;
 set types = (varchar, int);
@@ -9535,10 +9535,10 @@ add ("furniture", 10: 1);
 ------
 -- sport_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create sport_class;
 set types = (varchar, int);
@@ -9563,10 +9563,10 @@ add ("golf", 10: 1);
 ------
 -- book_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create book_class;
 set types = (varchar, int);
@@ -9591,10 +9591,10 @@ add ("mystery", 12: 1);
 ------
 -- electronic_class
 --   second level used to populate the item hierarchy
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class name	1. uniform
---  2. brand count 
+--  1. class name   1. uniform
+--  2. brand count
 ------
 create electronic_class;
 set types = (varchar, int);
@@ -9619,15 +9619,15 @@ add ("wireless", 17: 1);
 ------
 -- sizes
 --   size of a particular item, if applicable (based on category)
--- values			weights
+-- values           weights
 -- -----------------------
---	1. size		1. uniform	
---				2. for non-sized categories
---				3. size distributtion 
+--  1. size     1. uniform
+--              2. for non-sized categories
+--              3. size distributtion
 ------
 create sizes;
 set types = (varchar);
-set weights = 3; 
+set weights = 3;
 add ("petite": 1, 0, 17);
 add ("small": 1, 0, 17);
 add ("medium": 1, 0, 35);
@@ -9638,13 +9638,13 @@ add ("N/A": 1, 1, 4);
 
 ------
 -- units
--- values			weights
+-- values           weights
 -- -----------------------
---	1. unit name	1. uniform	
+--  1. unit name    1. uniform
 ------
 create units;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 add ("Unknown": 400);
 add ("Each": 400);
 add ("Dozen": 400);
@@ -9672,23 +9672,23 @@ add ("N/A": 400);
 ------
 create container;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 add ("Unknown": 4);
 
 
 ------
 -- colors
--- values			weights
+-- values           weights
 -- -----------------------
---	1. color	1. uniform	
---				2. skewed dist (used by dbgen)
---				3. low likelihood (used by qgen) 
---				4. medium likelihood (used by qgen) 
---				5. high likelihood (used by qgen) 
+--  1. color    1. uniform
+--              2. skewed dist (used by dbgen)
+--              3. low likelihood (used by qgen)
+--              4. medium likelihood (used by qgen)
+--              5. high likelihood (used by qgen)
 ------
 create colors;
 set types = (varchar);
-set weights = 5; 
+set weights = 5;
 set names = (name:uniform, skewed, low, medium, high);
 add ("almond": 1, 1, 1, 0, 0);
 add ("antique": 1, 1, 1, 0, 0);
@@ -9785,9 +9785,9 @@ add ("yellow": 1, 9, 0, 0, 1);
 
 ------
 -- brand_syllables
--- values			weights
+-- values           weights
 -- -----------------------
---	1. syllable	1. uniform	
+--  1. syllable 1. uniform
 ------
 create brand_syllables;
 set types = (varchar);
@@ -9805,53 +9805,53 @@ add ("maxi":1);
 
 ------
 -- i_current_price
--- values			weights
+-- values           weights
 -- -----------------------
---	1. min	1. unified	
---	2. max	2. low
---			3. medium
---			4. high
+--  1. min  1. unified
+--  2. max  2. low
+--          3. medium
+--          4. high
 -- NOTE: distcomp doesn't currently support decimal data type directly
 ------
 create i_current_price;
 set types = (int, varchar, varchar);
 set weights = 4;
 set names = (index, low_bound, high_bound: skew, high, medium, low);
-add (1, "0.09",	"4.99":	60, 1, 0, 0);
-add (2, "5.00",	"9.99":	30, 0, 1, 0);
-add (3, "10.00",	"99.99":10, 0, 0, 1);
+add (1, "0.09", "4.99": 60, 1, 0, 0);
+add (2, "5.00", "9.99": 30, 0, 1, 0);
+add (3, "10.00",    "99.99":10, 0, 0, 1);
 
 ------
 -- i_manufact_id
--- values			weights
+-- values           weights
 -- -----------------------
---	1. ind	1. unified	
---	2. min	2. low
---	3. max	3. medium
---		4. high
+--  1. ind  1. unified
+--  2. min  2. low
+--  3. max  3. medium
+--      4. high
 ------
 create i_manufact_id;
 set types = (int, int, int);
 set weights = 4;
-add (1, 1,		333:	60, 1, 0, 0);
-add (2, 334,	666:	30, 0, 1, 0);
-add (3, 667,	1000:	10, 0, 0, 1);
+add (1, 1,      333:    60, 1, 0, 0);
+add (2, 334,    666:    30, 0, 1, 0);
+add (3, 667,    1000:   10, 0, 0, 1);
 
 ------
 -- i_manager_id
--- values			weights
+-- values           weights
 -- -----------------------
---	1. index	1. unified	
---	2. min		2. low
---      3. max		3. medium
---			4. high
+--  1. index    1. unified
+--  2. min      2. low
+--      3. max      3. medium
+--          4. high
 ------
 create i_manager_id;
 set types = (int, int, int);
 set weights = 4;
-add (1, 1,		33:	60, 1, 0, 0);
-add (2, 34,	66:	30, 0, 1, 0);
-add (3, 67,	100:10, 0, 0, 1);
+add (1, 1,      33: 60, 1, 0, 0);
+add (2, 34, 66: 30, 0, 1, 0);
+add (3, 67, 100:10, 0, 0, 1);
 
 --
 --
@@ -9862,7 +9862,7 @@ add (3, 67,	100:10, 0, 0, 1);
 -- 1: Name                       1: frequency as a male name
 --                               2: frequency as a female name
 --                               3: frequency as name (gender ignored);
---                     
+--
 create first_names;
 set types =  (varchar);
 set weights = 3 ;
@@ -15035,7 +15035,7 @@ add ("Zulma": 0, 3, 3);
 --   data                        weights
 --   ====                        =======
 -- 1: Name                       1: frequency
---                     
+--
 create last_names;
 set types = (varchar);
 set weights = 1;
@@ -20045,8 +20045,8 @@ add ("Hofmann": 2);
 --
 ------
 -- rowcount
--- This distribution defines the rowcounts for each table at 
--- 6 discrete scaling levels the first (scale=1G) is intended 
+-- This distribution defines the rowcounts for each table at
+-- 6 discrete scaling levels the first (scale=1G) is intended
 -- for validation testing
 -- other values are not valid for publication, but are generated using
 -- the interpolation method defined for each table
@@ -20287,7 +20287,7 @@ add ("Ct.":1);
 ------
 create gender;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 add ("M": 50);
 add ("F": 50);
 
@@ -20296,7 +20296,7 @@ add ("F": 50);
 ------
 create marital_status;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 add ("M": 1);
 add ("S": 1);
 add ("D": 1);
@@ -20305,16 +20305,16 @@ add ("U": 1);
 
 ------
 -- education
--- values			weights
+-- values           weights
 -- -----------------------
---	1. level	1. uniform
---				2. good credit distribution
---				3. low credit distribution
---				4. high risk credit distribution
+--  1. level    1. uniform
+--              2. good credit distribution
+--              3. low credit distribution
+--              4. high risk credit distribution
 ------
 create education;
 set types = (varchar);
-set weights = 4; 
+set weights = 4;
 add ("Primary": 1, 650, 250, 100);
 add ("Secondary": 1, 3250, 1250, 500);
 add ("College": 1, 650, 250, 100);
@@ -20328,7 +20328,7 @@ add ("Unknown": 1, 10, 10, 10);
 ------
 create purchase_band;
 set types = (int);
-set weights = 1; 
+set weights = 1;
 add (500: 7);
 add (1000: 7);
 add (1500: 7);
@@ -20355,7 +20355,7 @@ add (10000: 1);
 ------
 create buy_potential;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 add ("0-500": 17);
 add ("501-1000": 17);
 add ("1001-5000": 35);
@@ -20368,7 +20368,7 @@ add ("Unknown": 4);
 ------
 create credit_rating;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 add ("Good": 65);
 add ("Low Risk": 25);
 add ("High Risk": 10);
@@ -20379,7 +20379,7 @@ add ("Unknown": 4);
 ------
 create income_band;
 set types = (int, int);
-set weights = 1; 
+set weights = 1;
 add (0, 10000: 7);
 add (10001, 20000: 7);
 add (20001, 30000: 7);
@@ -20407,7 +20407,7 @@ add (190001, 200000: 8);
 ------
 create dependent_count;
 set types = (int);
-set weights = 1; 
+set weights = 1;
 add (0: 25);
 add (1: 25);
 add (2: 10);
@@ -20424,7 +20424,7 @@ add (9: 2);
 ------
 create vehicle_count;
 set types = (int);
-set weights = 1; 
+set weights = 1;
 add (0: 17);
 add (1: 17);
 add (2: 35);
@@ -20437,7 +20437,7 @@ add (-1: 4);
 ------
 create promo_purpose;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 
 add ("Unknown": 4);
 
@@ -20446,7 +20446,7 @@ add ("Unknown": 4);
 ------
 create return_reasons;
 set types = (varchar);
-set weights = 6; 
+set weights = 6;
 add ("Package was damaged": 1, 0, 0, 0, 0, 0);
 add ("Stopped working": 1, 0, 0, 0, 0, 0);
 add ("Did not get it on time": 1, 0, 0, 0, 0, 0);
@@ -20525,18 +20525,18 @@ add ("reason 75": 1, 1, 1, 1, 1, 1);
 
 ------
 -- store_type
--- values			weights
+-- values           weights
 -- -----------------------
---	1. min_staff	1. uniform
---	2. max_staff
---	3. min_revenue
---	4. max_revenue
---	5. min_sqft
---	6. max_sqft
+--  1. min_staff    1. uniform
+--  2. max_staff
+--  3. min_revenue
+--  4. max_revenue
+--  5. min_sqft
+--  6. max_sqft
 ------
 create store_type;
 set types = (varchar, int, int, int, int, int, int);
-set weights = 1; 
+set weights = 1;
 
 add ("Big Box", 200, 300, 5000000, 10000000, 10000, 20000: 1);
 
@@ -20545,7 +20545,7 @@ add ("Big Box", 200, 300, 5000000, 10000000, 10000, 20000: 1);
 ------
 create geography_class;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 
 add ("Unknown": 4);
 ------
@@ -20553,7 +20553,7 @@ add ("Unknown": 4);
 ------
 create divisions;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 
 add ("Unknown": 4);
 ------
@@ -20561,22 +20561,22 @@ add ("Unknown": 4);
 ------
 create stores;
 set types = (varchar);
-set weights = 1; 
+set weights = 1;
 
 add ("Unknown": 4);
 ------
 -- hours
--- values			weights
+-- values           weights
 -- -----------------------
---	1. hour		1. uniform
---	2.	AM/PH	2. store shopping (skewed);
---	3.	shift	3. catalog/web shopping (skewed);
---	4.	sub-shift
---	5.	meal
+--  1. hour     1. uniform
+--  2.  AM/PH   2. store shopping (skewed);
+--  3.  shift   3. catalog/web shopping (skewed);
+--  4.  sub-shift
+--  5.  meal
 ------
 create hours;
 set types = (int, varchar, varchar, varchar, varchar);
-set weights = 3; 
+set weights = 3;
 add (0, "AM", "third", "night", "": 1, 0, 1);
 add (1, "AM", "third", "night", "": 1, 0, 2);
 add (2, "AM", "third", "night", "": 1, 0, 2);
@@ -20604,14 +20604,14 @@ add (23, "PM", "third", "evening", "": 1, 0, 1);
 
 ------
 -- call_centers
--- values			weights
+-- values           weights
 -- -----------------------
---	1. name		1. uniform
---				2. sales percentage
+--  1. name     1. uniform
+--              2. sales percentage
 ------
 create call_centers;
 set types = (varchar);
-set weights = 2; 
+set weights = 2;
 add ("New England": 1, 8);
 add ("NY Metro": 1, 16);
 add ("Mid Atlantic": 1, 10);
@@ -20627,11 +20627,11 @@ add ("Other": 1, 1);
 
 ------
 -- call_center_hours
--- values			weights
+-- values           weights
 -- -----------------------
---	1. hours	1. weighted
---				2. minimum second (for time join)
---				3. maximum second (for time join)
+--  1. hours    1. weighted
+--              2. minimum second (for time join)
+--              3. maximum second (for time join)
 ------
 create call_center_hours;
 set types = (varchar);
@@ -20642,9 +20642,9 @@ add ("8AM-8AM": 1, 0, 86399);
 
 ------
 -- call_center_class
--- values			weights
+-- values           weights
 -- -----------------------
---	1. class	1. uniform
+--  1. class    1. uniform
 ------
 create call_center_class;
 set types = (varchar);
@@ -20655,11 +20655,11 @@ add ("large": 1);
 
 ------
 -- salutations
--- values			weights
+-- values           weights
 -- -----------------------
---	1. title		1. gender neutral
---					2. male
---					3. female
+--  1. title        1. gender neutral
+--                  2. male
+--                  3. female
 ------
 create salutations;
 set types = (varchar);
@@ -20674,9 +20674,9 @@ add ("Dr.": 10, 10, 10);
 
 ------
 -- ship_mode_code
--- values			weights
+-- values           weights
 -- -----------------------
---	1. code		1. uniform
+--  1. code     1. uniform
 ------
 create ship_mode_code;
 set types = (varchar);
@@ -20691,9 +20691,9 @@ add ("COURIER": 1);
 
 ------
 -- ship_mode_type
--- values			weights
+-- values           weights
 -- -----------------------
---	1. type		1. uniform
+--  1. type     1. uniform
 ------
 create ship_mode_type;
 set types = (varchar);
@@ -20707,9 +20707,9 @@ add ("LIBRARY": 1);
 
 ------
 -- ship_mode_carrier
--- values			weights
+-- values           weights
 -- -----------------------
---	1. carrier		1. uniform
+--  1. carrier      1. uniform
 ------
 create ship_mode_carrier;
 set types = (varchar);
@@ -20738,9 +20738,9 @@ add ("PRIVATECARRIER": 1);
 
 ------
 -- web_page_use
--- values			weights
+-- values           weights
 -- -----------------------
---	1. type		1. uniform
+--  1. type     1. uniform
 ------
 create web_page_use;
 set types = (varchar);
@@ -20756,9 +20756,9 @@ add ("review": 1);
 
 ------
 -- web_page_type
--- values			weights
+-- values           weights
 -- -----------------------
---	1. content type		1. skewed
+--  1. content type     1. skewed
 ------
 create web_page_type;
 set types = (varchar);
@@ -20781,10 +20781,10 @@ add ("jms": 3);
 
 ------
 -- catalog_page_type
--- values			weights
+-- values           weights
 -- -----------------------
---	1. content type		1. distribution freq
---						2. sales volume
+--  1. content type     1. distribution freq
+--                      2. sales volume
 ------
 create catalog_page_type;
 set types = (varchar);
@@ -20795,10 +20795,10 @@ add ("monthly": 12, 25);
 
 ------
 -- location_type
--- values			weights
+-- values           weights
 -- -----------------------
---	1. location type	1. uniform
---						2. distribution freq
+--  1. location type    1. uniform
+--                      2. distribution freq
 ------
 create location_type;
 set types = (varchar);
@@ -20809,9 +20809,9 @@ add ("apartment": 1, 25);
 
 ------
 -- top_domains
--- values			weights
+-- values           weights
 -- -----------------------
---	1. domain suffix	1. uniform
+--  1. domain suffix    1. uniform
 ------
 create top_domains;
 set types = (varchar);
@@ -20822,9 +20822,9 @@ add ("edu": 1);
 
 ------
 -- coutries
--- values			weights
+-- values           weights
 -- -----------------------
---	1. country	1. uniform
+--  1. country  1. uniform
 ------
 create countries;
 set types = (varchar);
