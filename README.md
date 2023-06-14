@@ -24,7 +24,7 @@ TPC Express Benchmark AI (TPCx-AI) is an AI benchmark that models several aspect
 
 **THIS REPOSITORY IS IN A VERY EARLY DEVELOPMENT STAGE!**
 
-# Accept the Data Generator (PDGF) License
+## Accept the Data Generator (PDGF) License
 
 The first time you try to run the benchmark you will be asked to accept the License of the synthetic data generator.
 You can do so by executing
@@ -33,7 +33,7 @@ You can do so by executing
 docker-compose run --build benchmark
 ```
 
-# Running the benchmark
+## Running the benchmark
 
 Run the benchmark, e.g., for UC4, with:
 
