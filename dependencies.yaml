@@ -5,53 +5,62 @@ channels:
   - nvidia
   - conda-forge
 files:
-  all:
+  engine:
     output: conda
     includes:
-      - run
-      - tensorflow
-      - opencv
-  uc4:
+      - driver
+      - engine
+  engine-ks:
     output: conda
     includes:
-      - run
+      - driver
+      - engine
+      - engine-ks
 dependencies:
-  run:
+
+  driver:
     common:
       - output_types: conda
         packages:
           - python=3.10
-          - jinja2=3.0.2
+          - pyyaml=6.0
+          - matplotlib=3.5
+          - jinja2=3.0.3
+          - pycryptodome=3.14
+          - zip
+
+  engine:
+    common:
+      - output_types: conda
+        packages:
+          - python=3.10
           - joblib=1.1.0
           - libsndfile
-          - matplotlib=3.5.0
           - mesa-libgl-cos6-x86_64
           - nose=1.3.7
           - numpy<1.23.0
           - openjdk<9
           - pandas=1
           - patsy=0.5.2
-          - pycryptodome=3.12
-          - pyyaml=6.0
           - scikit-learn=1.0.2
           - scipy=1.7.3
           - setuptools
           - statsmodels
           - tqdm=4.62
-          - xgboost=1.5.0
+          - xgboost=1.5.1
           - xorg-libxcursor
           - xorg-libxrandr
           - xorg-libxxf86vm
-  tensorflow:
-  # Required for: UC2, UC5, UC9
+          - keras  # uc2,5,9
+          - tensorflow  # uc2,5,9
+          - opencv  #uc9
+
+  engine-ks:  # to be used in conjunction with engine
     common:
       - output_types: conda
         packages:
-          - keras=2.3.1
-          - tensorflow=2.1
-  opencv:
-  # Required for: UC9
-    common:
-      - output_types: conda
-        packages:
-          - opencv=3.4.2
+          - patsy=0.5.2
+          - dlib
+          - scikit-surprise=1.1.1
+          - librosa=0.8.1
+          - imbalanced-learn=0.9.0

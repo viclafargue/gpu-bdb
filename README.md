@@ -129,6 +129,12 @@ The first time you try to run the benchmark you will be asked to accept the Lice
 
 # Running the benchmark
 
+Run the benchmark with:
+
+```bash
+docker-compose run --build benchmark
+```
+
 Note: Use cases are numbered sequentally from 1 to 10. During the benchmark execution or in the reports generated at the end of the benchmark execution, a special artifact named "use case 0" may show up. Use case 0 is not a real use case, it is used as a special name used to record the execution of certain  parts of the benchmark that perform global operations applying to all use cases and not to a particular one (e.g. Data generation).
 
 Before running the benchmark for the first time you will have to set the following variables in the setenv.sh file:

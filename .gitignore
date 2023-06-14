@@ -5,3 +5,4 @@ logs/
 output/
 build/
 conda/
+data-gen/Constants.properties
