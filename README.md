@@ -129,7 +129,13 @@ The first time you try to run the benchmark you will be asked to accept the Lice
 
 # Running the benchmark
 
-Run the benchmark with:
+First, make sure to accept the EULA with
+
+```bash
+docker-compose run accept-eula
+```
+
+Then run the benchmark with:
 
 ```bash
 docker-compose run --build benchmark

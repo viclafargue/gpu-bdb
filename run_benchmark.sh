@@ -31,6 +31,8 @@ set -e
 
 . setenv.sh
 
+./.eula/check.sh
+
 LOG_DEST="tpcxai_benchmark_run"
 TPCxAI_CONFIG_FILE_PATH=${TPCxAI_BENCHMARKRUN_CONFIG_FILE_PATH}
 if [[ ${IS_VALIDATION_RUN} -eq "1" ]]; then

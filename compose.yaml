@@ -24,3 +24,21 @@ services:
       - type: bind
         source: ./data-gen
         target: /opt/gpu-xb-ai/data-gen/
+
+  accept-eula:
+    image: alpine:latest
+    working_dir: /opt/gpu-xb-ai
+    volumes:
+      - type: bind
+        source: /raid/sadorf/dev/rapids/gpu-xb-ai/.eula
+        target: /opt/gpu-xb-ai/.eula
+      - type: bind
+        source: /raid/sadorf/dev/rapids/gpu-xb-ai/EULA.txt
+        target: /opt/gpu-xb-ai/EULA.txt
+        read_only: true
+      - type: bind
+        source: /raid/sadorf/dev/rapids/gpu-xb-ai/data-gen
+        target: /opt/gpu-xb-ai/data-gen
+        bind:
+          create_host_path: true
+    command: /bin/sh /opt/gpu-xb-ai/.eula/prompt.sh
