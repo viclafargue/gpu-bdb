@@ -30,7 +30,7 @@ The first time you try to run the benchmark you will be asked to accept the Lice
 You can do so by executing
 
 ```bash
-docker-compose run --build benchmark
+docker-compose run accept-eula
 ```
 
 ## Running the benchmark
