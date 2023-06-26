@@ -13,10 +13,7 @@
 # limitations under the License.
 #
 
-ARG CUDA_VER="11.8.0"
-ARG LINUX_VER="ubuntu22.04"
-ARG PY_VER="3.10"
-FROM rapidsai/mambaforge-cuda:cuda${CUDA_VER}-base-${LINUX_VER}-py${PY_VER}
+FROM rapidsai/devcontainers:23.06-cpp-llvm16-cuda11.8-mambaforge-ubuntu22.04
 
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-dev \
@@ -33,4 +30,4 @@ WORKDIR /opt/gpu-xb-ai/
 
 RUN /bin/bash setup-python.sh
 
-ENTRYPOINT [ "mamba", "run", "--prefix", "lib/python-venv", "./run_benchmark.sh" ]
+ENTRYPOINT [ "/opt/conda/bin/mamba", "run", "--prefix", "lib/python-venv", "./run_benchmark.sh" ]
