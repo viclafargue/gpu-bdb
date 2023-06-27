@@ -1,0 +1,6 @@
+.secrets/*
+data-gen/*
+logs/*
+compose*.yaml
+Dockerfile*
+.dockerignore

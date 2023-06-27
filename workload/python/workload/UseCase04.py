@@ -39,9 +39,16 @@ import numpy as np
 import pandas as pd
 
 # Naive Bayes
-from sklearn import feature_extraction, naive_bayes
-from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.pipeline import Pipeline
+
+if os.environ.get("LEGATE") == "1":
+    from naive_bayes import MultinomialNB
+
+    # TODO: Support TfidfTransformer and CountVectorizer with Legate.
+    from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+else:
+    from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+    from sklearn.naive_bayes import MultinomialNB
 
 
 def load_data(path: str) -> pd.DataFrame:
@@ -56,17 +63,17 @@ def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def train(data: pd.DataFrame) -> naive_bayes:
+def train(data: pd.DataFrame):
     bayesTfIDF = Pipeline(
         [
             (
                 "cv",
-                feature_extraction.text.CountVectorizer(
+                CountVectorizer(
                     stop_words="english", ngram_range=(1, 2), decode_error="replace"
                 ),
             ),
             ("tf-idf", TfidfTransformer()),
-            ("mnb", naive_bayes.MultinomialNB()),
+            ("mnb", MultinomialNB()),
         ]
     )
 

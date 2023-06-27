@@ -1,0 +1,99 @@
+# Copyright 2023 NVIDIA Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+ARG BASE_IMAGE="rapidsai/devcontainers:23.06-cpp-llvm16-cuda11.8-mambaforge-ubuntu22.04"
+
+FROM alpine/git AS get_legate_raft
+
+ARG GITHUB_USER
+ARG RAFT_LEGATE_REPO="github.com/rapidsai/raft-legate.git"
+ARG RAFT_LEGATE_BRANCH="nb-sparse"
+ARG RAFT_LEGATE_WORKDIR="/opt/legate/raft-legate"
+
+RUN --mount=type=secret,id=github_token export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
+  && git clone --depth=1 --branch=${RAFT_LEGATE_BRANCH} https://${GITHUB_USER}:${GITHUB_TOKEN}@${RAFT_LEGATE_REPO} ${RAFT_LEGATE_WORKDIR} \
+  && rm -rf ${RAFT_LEGATE_WORKDIR}/.git
+
+FROM ${BASE_IMAGE}
+
+ARG RAFT_LEGATE_WORKDIR="/opt/legate/raft-legate"
+
+COPY --from=get_legate_raft ${RAFT_LEGATE_WORKDIR} ${RAFT_LEGATE_WORKDIR}
+
+# Install GPU-XB-AI
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-dev \
+    libxext-dev \
+    libxi-dev \
+    libxrender-dev \
+    libxt-dev \
+    libxtst-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /opt/gpu-xb-ai/
+
+WORKDIR /opt/gpu-xb-ai/
+
+RUN /bin/bash setup-python.sh
+
+# Install legate.core
+ARG PYTHON_VER=3.10
+ARG LEGATE_CORE_REPO=https://github.com/csadorf/legate.core.git
+ARG LEGATE_CORE_BRANCH=legate-sparse-branch-23.05
+ARG LEGATE_CORE_WORKDIR="/opt/legate/legate.core"
+
+RUN git clone --depth 1 --branch ${LEGATE_CORE_BRANCH} ${LEGATE_CORE_REPO} ${LEGATE_CORE_WORKDIR}
+
+# Install legate.core dependencies.
+WORKDIR ${LEGATE_CORE_WORKDIR}
+
+RUN /bin/bash -c \
+    'export CUDA_VER="11.8" \
+    && export YML_FILE="${LEGATE_CORE_WORKDIR}/environment-test-linux-py${PYTHON_VER}-cuda${CUDA_VER}-ucx.yaml" \
+    && ./scripts/generate-conda-envs.py --python ${PYTHON_VER} --ctk ${CUDA_VER} --os linux --no-compilers --no-openmpi \
+    && mamba env update -n legate -f "environment-test-linux-py${PYTHON_VER}-cuda${CUDA_VER}-ucx.yaml"'
+
+# Install legate-raft dependencies.
+RUN /bin/bash -c ' \
+    mamba activate legate \
+    && mamba install -y -c conda-forge \
+      numpy \
+      scikit-learn \
+      scipy \
+    && mamba install -y -c conda-forge -c rapidsai -c nvidia \
+      pylibraft=23.06* \
+      raft-dask=23.06* \
+    && mamba clean --all'
+
+# Install legate.core
+RUN /bin/bash -c \
+    'mamba activate legate \
+    && ./install.py --cuda --with-cuda /usr/local/cuda --arch 70 --with-ucx "${CONDA_PREFIX}/lib/ucx/"'
+
+# Install legate-raft
+
+WORKDIR ${RAFT_LEGATE_WORKDIR}
+
+RUN /bin/bash -c ' \
+    mamba activate legate && \
+    export CMAKE_INSTALL_PREFIX=$CONDA_PREFIX && \
+    export CMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH:${LEGATE_CORE_WORKDIR}/_skbuild/linux-x86_64-3.9/cmake-install/" && \
+    bash -x "${RAFT_LEGATE_WORKDIR}/build.sh"'
+
+# Support use Python binary instead of "legate" wrapper.
+ENV LD_LIBRARY_PATH="/opt/conda/envs/legate/lib:${LD_LIBRARY_PATH}"
+
+WORKDIR /opt/gpu-xb-ai/
+
+ENTRYPOINT [ "./run_benchmark.sh" ]

@@ -29,9 +29,9 @@
 # Stop if any command fails
 set -e
 
-. setenv.sh
-
 ./.eula/check.sh
+
+mamba activate lib/python-venv
 
 LOG_DEST="tpcxai_benchmark_run"
 TPCxAI_CONFIG_FILE_PATH=${TPCxAI_BENCHMARKRUN_CONFIG_FILE_PATH}

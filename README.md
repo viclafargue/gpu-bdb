@@ -57,3 +57,27 @@ docker-compose run --build benchmark -uc 4
 *Note, currently only UC4 is tested and validated to work.*
 
 Note: Use cases are numbered sequentally from 1 to 10. During the benchmark execution or in the reports generated at the end of the benchmark execution, a special artifact named "use case 0" may show up. Use case 0 is not a real use case, it is used as a special name used to record the execution of certain  parts of the benchmark that perform global operations applying to all use cases and not to a particular one (e.g. Data generation).
+
+## Running the benchmark with Legate
+
+To run the benchmark with Legate, we need to specify that we want to use Legate both for building the image and running the container.
+
+Building the container for Legate requires access to the private https://github.com/rapidsai/raft-legate repository.
+To enable the build, first create a GitHub personal access token with read permissions to the raft-legate repository and then configure the build environment as follows:
+
+1. Clone this (the gpu-xb-ai) repository.
+3. Within the just cloned repository, create a file called `.secrets/github_token` that contains the earlier created PAT.
+
+Then build the Legate container with the following command:
+
+```bash
+GITHUB_USER=<github_user> docker-compose -f compose.yaml -f compose.legate.yaml build
+```
+where you replace `<github_user>` with your actual GitHub username.
+
+Run the benchmark, e.g., w/ UC4:
+```bash
+docker-compsoe -f compose.yaml -f compose.legate.yaml run --rm -e LEGATE_CONFIG='--gpus=8' benchmark -uc 4
+```
+
+Control the execution environment by setting the `LEGATE_CONFIG` environment variable within the container.

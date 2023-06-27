@@ -5,3 +5,4 @@ logs/
 output/
 build/
 data-gen/Constants.properties
+.secrets/

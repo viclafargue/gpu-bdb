@@ -7,13 +7,14 @@ services:
     image: rapidsai/gpu-xb-ai:latest
     build:
       context: .
-      dockerfile: Dockerfile.ase
+      dockerfile: Dockerfile
     environment:
       TPCxAI_SCALE_FACTOR: 1
       TPCxAI_SERVING_THROUGHPUT_STREAMS: 2
+      TPCx_AI_HOME_DIR: /opt/gpu-xb-ai
+      TPCxAI_ENV_TOOLS_DIR: /opt/gpu-xb-ai/tools/python
       TPCxAI_VALIDATION_CONFIG_FILE_PATH: /opt/gpu-xb-ai/driver/config/default.yaml
       TPCxAI_BENCHMARKRUN_CONFIG_FILE_PATH: /opt/gpu-xb-ai/driver/config/default.yaml
-      TPCxAI_ENV_TOOLS_DIR: /opt/gpu-xb-ai/tools/python
       TPCxAI_PSSH: pssh
       TPCxAI_PSCP: pscp.pssh
       TPCxAI_PDGF_JAVA_OPTS:

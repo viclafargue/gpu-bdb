@@ -30,20 +30,21 @@
 # return on any error
 set -e
 
-# Create the virtual environment
-echo "Create virtual env"
+# Create the virtual environments
+echo "Create virtual envs"
 mamba env create --prefix ./lib/python-venv --file conda/environments/engine.yaml
 mamba env create --prefix ./lib/python-venv-ks --file conda/environments/engine-ks.yaml
+mamba env update -n legate --file conda/environments/engine.yaml
 
 #lib/python-venv/bin/pip install -U pip
 #lib/python-venv/bin/pip install git+https://github.com/evanhempel/python-flamegraph.git
 
 # Build the workload (Python)
 echo "Build Workload (Python)"
-mamba run --prefix ./lib/python-venv pip install -e workload/python
-mamba run --prefix ./lib/python-venv-ks pip install -e workload/python
+mamba run --prefix ./lib/python-venv python -m pip install -e workload/python
+mamba run --prefix ./lib/python-venv-ks python -m pip install -e workload/python
+mamba run -n legate python -m pip install -e workload/python
 
 # Build the driver
 echo "Build driver"
-mamba run --prefix ./lib/python-venv pip install -e driver
-mamba run --prefix ./lib/python-venv-ks pip install -e driver
+mamba run --prefix ./lib/python-venv python -m pip install -e driver

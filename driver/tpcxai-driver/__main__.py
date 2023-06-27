@@ -734,9 +734,10 @@ def main():
     streams_mapping_keys = [
         x for x in workload.keys() if x.startswith("serving_throughput_stream")
     ]
-    if num_streams < 2:
-        print(f"number of desired streams ({num_streams}) has to be at least 2")
-        exit(1)
+    # Unable to run with more than one stream in combination with Legate.
+    # if num_streams < 2:
+    #     print(f"number of desired streams ({num_streams}) has to be at least 2")
+    #     exit(1)
     if num_streams > len(streams_mapping_keys):
         print(
             f"number of desired streams ({num_streams}) exceeds the number of available streams ({len(streams_mapping_keys)})"

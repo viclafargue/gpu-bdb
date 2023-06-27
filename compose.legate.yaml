@@ -1,0 +1,29 @@
+---
+services:
+
+  benchmark:
+    image: rapidsai/gpu-xb-ai:legate
+    build:
+      context: .
+      args:
+        - GITHUB_USER
+      secrets:
+        - github_token
+      dockerfile: Dockerfile.legate
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      LEGATE: 1
+      TPCxAI_SCALE_FACTOR: 1
+      TPCxAI_SERVING_THROUGHPUT_STREAMS: 1
+      TPCxAI_VALIDATION_CONFIG_FILE_PATH: /opt/gpu-xb-ai/driver/config/default-legate.yaml
+      TPCxAI_BENCHMARKRUN_CONFIG_FILE_PATH: /opt/gpu-xb-ai/driver/config/default-legate.yaml
+
+secrets:
+  github_token:
+    file: .secrets/github_token
