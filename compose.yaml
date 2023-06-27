@@ -30,14 +30,14 @@ services:
     working_dir: /opt/gpu-xb-ai
     volumes:
       - type: bind
-        source: /raid/sadorf/dev/rapids/gpu-xb-ai/.eula
+        source: ./.eula
         target: /opt/gpu-xb-ai/.eula
       - type: bind
-        source: /raid/sadorf/dev/rapids/gpu-xb-ai/EULA.txt
+        source: ./EULA.txt
         target: /opt/gpu-xb-ai/EULA.txt
         read_only: true
       - type: bind
-        source: /raid/sadorf/dev/rapids/gpu-xb-ai/data-gen
+        source: ./data-gen
         target: /opt/gpu-xb-ai/data-gen
         bind:
           create_host_path: true
