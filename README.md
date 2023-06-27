@@ -24,6 +24,19 @@ TPC Express Benchmark AI (TPCx-AI) is an AI benchmark that models several aspect
 
 **THIS REPOSITORY IS IN A VERY EARLY DEVELOPMENT STAGE!**
 
+## Clone this repository
+
+This repository uses **git-lfs** to track large files instead of directly committing them to the repository.
+Please make sure to install **git-lfs** on your system, e.g., by following [these instructions](https://docs.github.com/en/repositories/working-with-files/managing-large-files/installing-git-large-file-storage), *before* cloning this repository.
+
+You can test whether **git-lfs** is already installed by running
+
+```bash
+git lfs install
+```
+
+*Note to contributors:* Please track large files (> ~1MB) with **git-lfs** instead of committing them directly to the repository.
+
 ## Accept the Data Generator (PDGF) License
 
 The first time you try to run the benchmark you will be asked to accept the License of the synthetic data generator.
