@@ -77,7 +77,7 @@ where you replace `<github_user>` with your actual GitHub username.
 
 Run the benchmark, e.g., w/ UC4:
 ```bash
-docker-compsoe -f compose.yaml -f compose.legate.yaml run --rm -e LEGATE_CONFIG='--gpus=8' benchmark -uc 4
+docker-compose -f compose.yaml -f compose.legate.yaml run --rm -e LEGATE_CONFIG='--gpus=8' benchmark -uc 4
 ```
 
 Control the execution environment by setting the `LEGATE_CONFIG` environment variable within the container.
