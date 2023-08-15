@@ -1,0 +1,30 @@
+---
+services:
+
+  benchmark:
+    image: rapidsai/gpu-xb-ai:rapids
+    build:
+      context: .
+      dockerfile: Dockerfile.rapids
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - ${PWD}/base.py:/opt/gpu-xb-ai/lib/python-venv/lib/python3.10/site-packages/cuml/dask/common/base.py
+      - type: bind
+        source: ./workload
+        target: /opt/gpu-xb-ai/workload
+        read_only: true
+    environment:
+      RAPIDS: 1
+      TPCxAI_SCALE_FACTOR: 1
+      TPCxAI_SERVING_THROUGHPUT_STREAMS: 1
+      TPCx_AI_HOME_DIR: /opt/gpu-xb-ai
+      TPCxAI_ENV_TOOLS_DIR: /opt/gpu-xb-ai/tools/python
+      TPCxAI_VALIDATION_CONFIG_FILE_PATH: /opt/gpu-xb-ai/driver/config/default.yaml
+      TPCxAI_BENCHMARKRUN_CONFIG_FILE_PATH: /opt/gpu-xb-ai/driver/config/default.yaml
+

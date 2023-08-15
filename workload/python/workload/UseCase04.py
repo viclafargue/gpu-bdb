@@ -33,43 +33,63 @@ import os
 import timeit
 
 import joblib
-import numpy as np
+import cupy as cp
 
 # data frames
-import pandas as pd
+import dask_cudf
 
 # Naive Bayes
 from sklearn.pipeline import Pipeline
 
-if os.environ.get("LEGATE") == "1":
-    from naive_bayes import MultinomialNB
-
-    # TODO: Support TfidfTransformer and CountVectorizer with Legate.
-    from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-else:
-    from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
-    from sklearn.naive_bayes import MultinomialNB
+from cuml.dask.feature_extraction.text import TfidfTransformer
+from cuml.feature_extraction.text import HashingVectorizer
+from cuml.dask.naive_bayes import MultinomialNB
 
 
-def load_data(path: str) -> pd.DataFrame:
-    raw_data = pd.read_csv(path, delimiter="|", encoding="utf8")
+def load_data(path: str) -> dask_cudf.DataFrame:
+    raw_data = dask_cudf.read_csv(path, delimiter="|")
     raw_data["text"] = raw_data["text"].astype(str)
     return raw_data
 
 
-def clean_data(data: pd.DataFrame) -> pd.DataFrame:
+def clean_data(data: dask_cudf.DataFrame) -> dask_cudf.DataFrame:
     # drop duplicates
     data.drop_duplicates(inplace=True)
     return data
 
 
-def train(data: pd.DataFrame):
+class Vectorizer:
+    def __init__(self, stop_words, ngram_range):
+        self.stop_words = stop_words
+        self.ngram_range = ngram_range
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        def vectorize(df, stop_words, ngram_range):
+            hv = HashingVectorizer(stop_words=stop_words,
+                                   ngram_range=ngram_range)
+            return hv.fit_transform(df)
+        return X.map_partitions(vectorize, self.stop_words, self.ngram_range)
+
+original_fit_func = TfidfTransformer.fit
+def tfidf_fit(self, X, y=None):
+    return original_fit_func(self, X)
+TfidfTransformer.fit = tfidf_fit
+
+original_ft_func = TfidfTransformer.fit_transform
+def tfidf_fit_transform(self, X, y=None):
+    return original_ft_func(self, X)
+TfidfTransformer.fit_transform = tfidf_fit_transform
+
+def train(data: dask_cudf.DataFrame):
     bayesTfIDF = Pipeline(
         [
             (
-                "cv",
-                CountVectorizer(
-                    stop_words="english", ngram_range=(1, 2), decode_error="replace"
+                "hv",
+                Vectorizer(
+                    stop_words="english", ngram_range=(1, 2)
                 ),
             ),
             ("tf-idf", TfidfTransformer()),
@@ -81,10 +101,19 @@ def train(data: pd.DataFrame):
     return bayesTfIDF.fit(data["text"], data["spam"].values)
 
 
-def serve(model, data: pd.DataFrame) -> np.array:
+def serve(model, data: dask_cudf.DataFrame) -> cp.array:
     predictions = model.predict(data["text"])
+    from distributed import wait
+    wait(predictions, timeout=60)
     return predictions
 
+
+def dask_init():
+    from dask_cuda import LocalCUDACluster
+    from dask.distributed import Client
+    # Create a local CUDA cluster
+    cluster = LocalCUDACluster()
+    client = Client(cluster)
 
 def main():
     model_file_name = "uc04.python.model"
@@ -116,6 +145,8 @@ def main():
     if not os.path.exists(output):
         os.makedirs(output)
 
+    dask_init()
+
     start = timeit.default_timer()
     raw_data = load_data(path)
     end = timeit.default_timer()
@@ -143,7 +174,7 @@ def main():
         serve_time = end - start
         print("serve time:\t", serve_time)
 
-        out_data = pd.DataFrame(prediction, columns=["spam"])
+        out_data = dask_cudf.DataFrame(prediction, columns=["spam"])
         out_data["ID"] = cleaned_data["ID"]
         out_data.to_csv(output + "/predictions.csv", index=False, sep="|")
 

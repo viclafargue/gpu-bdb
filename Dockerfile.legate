@@ -18,7 +18,7 @@ FROM alpine/git AS get_legate_raft
 
 ARG GITHUB_USER
 ARG RAFT_LEGATE_REPO="github.com/rapidsai/raft-legate.git"
-ARG RAFT_LEGATE_BRANCH="nb-sparse"
+ARG RAFT_LEGATE_BRANCH="main"
 ARG RAFT_LEGATE_WORKDIR="/opt/legate/raft-legate"
 
 RUN --mount=type=secret,id=github_token export GITHUB_TOKEN=$(cat /run/secrets/github_token) \

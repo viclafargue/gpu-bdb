@@ -29,7 +29,7 @@
 # Stop if any command fails
 set -e
 
-./.eula/check.sh
+#./.eula/check.sh
 
 mamba activate lib/python-venv
 

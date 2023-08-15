@@ -1,0 +1,42 @@
+# Copyright 2023 NVIDIA Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+FROM alpine/git
+FROM "rapidsai/devcontainers:23.06-cpp-llvm16-cuda11.8-mambaforge-ubuntu22.04"
+
+# Install GPU-XB-AI
+RUN apt-get update && apt-get install -y \
+    libgl1-mesa-dev \
+    libxext-dev \
+    libxi-dev \
+    libxrender-dev \
+    libxt-dev \
+    libxtst-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /opt/gpu-xb-ai/
+
+WORKDIR /opt/gpu-xb-ai/
+
+RUN /bin/bash setup-python.sh
+
+WORKDIR /opt/gpu-xb-ai/
+
+#RUN wget https://raw.githubusercontent.com/rapidsai/cuml/branch-23.10/conda/environments/all_cuda-118_arch-x86_64.yaml
+#RUN head -n -1 all_cuda-118_arch-x86_64.yaml > tmp.yaml && mv tmp.yaml all_cuda-118_arch-x86_64.yaml
+COPY all_cuda-118_arch-x86_64.yaml $PWD
+RUN /bin/bash -c 'mamba activate lib/python-venv && mamba env update --file all_cuda-118_arch-x86_64.yaml'
+
+ENTRYPOINT [ "./run_benchmark.sh" ]
